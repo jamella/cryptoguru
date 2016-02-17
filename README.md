@@ -1,2 +1,2 @@
 # cryptoguru
-A python package containing efficient attacks on well-known crypto algorithms (RSA, DLP, 
+A python package containing efficient attacks on well-known crypto algorithms (RSA, DLP) and some factoring tools
