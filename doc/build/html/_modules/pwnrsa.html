@@ -1,0 +1,472 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pwnrsa &mdash; cryptoguru Beta documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'Beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="cryptoguru Beta documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pwnrsa</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (C) 2016 Amaury Behague &lt;amaury.behague@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of cryptoguru.</span>
+<span class="c1">#</span>
+<span class="c1"># cryptopwn is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Amaury Behague&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2016, Amaury Behague&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;GPL&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;3&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;amaury.behague@gmail.com&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Beta&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: pwnrsa</span>
+<span class="sd">	:platform: Unix</span>
+<span class="sd">	:synopsis: Efficient attacks on RSA.</span>
+<span class="sd">	</span>
+<span class="sd">.. moduleauthor:: Amaury Behague &lt;amaury.behague@gmail.com&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">itools</span><span class="o">,</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
+
+<span class="c1">#TODO: check that this fonctions works as intended in uncommon cases</span>
+<span class="c1">#TODO: write a better version of this function</span>
+<div class="viewcode-block" id="gen_convergents"><a class="viewcode-back" href="../pwnrsa.html#pwnrsa.gen_convergents">[docs]</a><span class="k">def</span> <span class="nf">gen_convergents</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">denom_only</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Generates the continued fraction representation of a/b.</span>
+<span class="sd">	Very similar to Euclide&#39;s extended algorithm.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *a (int)*: some integer</span>
+<span class="sd">		- *b (int)*: another integer</span>
+<span class="sd">	</span>
+<span class="sd">	Optional args:</span>
+<span class="sd">		- *verbose (bool)*: set to True to get a display.</span>
+<span class="sd">		- *denom_only (bool)*: set to True if you only need the list of denominators.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(List)*: a list of tuples (integers if denom_only is set to True) representing the continued fraction.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+		
+	<span class="n">conv</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">if</span> <span class="n">a</span> <span class="o">&gt;=</span> <span class="n">b</span><span class="p">:</span>
+		<span class="n">r0</span> <span class="o">=</span> <span class="n">a</span>
+		<span class="n">r1</span> <span class="o">=</span> <span class="n">b</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">r0</span> <span class="o">=</span> <span class="n">b</span>
+		<span class="n">r1</span> <span class="o">=</span> <span class="n">a</span>
+	<span class="n">u0</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="n">v0</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="n">u1</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="n">v1</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+		<span class="k">print</span><span class="p">(</span><span class="s2">&quot;q</span><span class="se">\t</span><span class="s2">r</span><span class="se">\t</span><span class="s2">u</span><span class="se">\t</span><span class="s2">v&quot;</span><span class="p">)</span>
+		<span class="k">print</span><span class="p">(</span><span class="s2">&quot;0</span><span class="se">\t</span><span class="s2">{0}</span><span class="se">\t</span><span class="s2">{1}</span><span class="se">\t</span><span class="s2">{2}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r0</span><span class="p">,</span> <span class="n">u0</span><span class="p">,</span> <span class="n">v0</span><span class="p">))</span>
+	<span class="n">fini</span> <span class="o">=</span> <span class="bp">False</span>
+	<span class="k">while</span> <span class="ow">not</span> <span class="n">fini</span><span class="p">:</span>
+		<span class="n">q</span> <span class="o">=</span> <span class="n">r0</span> <span class="o">//</span> <span class="n">r1</span>
+		<span class="n">temp</span> <span class="o">=</span> <span class="n">r0</span> <span class="o">%</span> <span class="n">r1</span>
+		<span class="n">r0</span> <span class="o">=</span> <span class="n">r1</span>
+		<span class="n">r1</span> <span class="o">=</span> <span class="n">temp</span>
+		<span class="n">temp</span> <span class="o">=</span> <span class="n">u0</span> <span class="o">-</span> <span class="n">q</span> <span class="o">*</span> <span class="n">u1</span>
+		<span class="n">u0</span> <span class="o">=</span> <span class="n">u1</span>
+		<span class="n">u1</span> <span class="o">=</span> <span class="n">temp</span>
+		<span class="n">temp</span> <span class="o">=</span> <span class="n">v0</span> <span class="o">-</span> <span class="n">q</span> <span class="o">*</span> <span class="n">v1</span>
+		<span class="n">v0</span> <span class="o">=</span> <span class="n">v1</span>
+		<span class="n">v1</span> <span class="o">=</span> <span class="n">temp</span>
+		<span class="k">if</span> <span class="n">denom_only</span><span class="p">:</span>
+			<span class="n">conv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">v0</span><span class="p">))</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">conv</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">abs</span><span class="p">(</span><span class="n">u0</span><span class="p">),</span><span class="nb">abs</span><span class="p">(</span><span class="n">v0</span><span class="p">)])</span>
+		<span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;{0}</span><span class="se">\t</span><span class="s2">{1}</span><span class="se">\t</span><span class="s2">{2}</span><span class="se">\t</span><span class="s2">{3}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r0</span><span class="p">,</span> <span class="n">u0</span><span class="p">,</span> <span class="n">v0</span><span class="p">))</span>
+		<span class="k">if</span> <span class="n">r1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">fini</span> <span class="o">=</span> <span class="bp">True</span>
+			<span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+				<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Algo termine&quot;</span><span class="p">)</span>
+				<span class="k">print</span><span class="p">(</span><span class="s2">&quot;pgcd({0},{1}) = {2} = {3}x{4} + {5}x{6}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">r0</span><span class="p">,</span> <span class="n">u0</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">v0</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
+	<span class="k">return</span> <span class="n">conv</span></div>
+
+<span class="c1">#Conv = gen_convergents(60728973,160523347,False,False)</span>
+<span class="c1">#print(Conv)</span>
+
+
+<div class="viewcode-block" id="get_pq"><a class="viewcode-back" href="../pwnrsa.html#pwnrsa.get_pq">[docs]</a><span class="k">def</span> <span class="nf">get_pq</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">phi</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Returns the facorisation of an RSA integer when you know its Euler totient.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: a RSA integer (n = p*q with p and q two prime numbers).</span>
+<span class="sd">		- *phi (int)*: Euler&#39;s totient for n (or a guess).</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *verbose (bool)*: set to True to get a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(double,double)*: two real numbers which are the solution of a simple second degree polynomial equation.</span>
+<span class="sd">							If those number are integers, then phi was indeed Euler&#39;s totient for n.</span>
+<span class="sd">		</span>
+<span class="sd">	This function is useful to test if a given phi is a plausible one.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">a</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">phi</span> <span class="o">+</span><span class="mi">1</span>
+	<span class="n">delta</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="n">a</span> <span class="o">-</span> <span class="mi">4</span><span class="o">*</span><span class="n">n</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">delta</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;get_pq : Error! delta &lt; 0&quot;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+	<span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">delta</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+	<span class="n">q</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">delta</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+	<span class="k">return</span> <span class="n">p</span><span class="p">,</span><span class="n">q</span></div>
+
+
+<span class="c1"># n : modulo, e : exposant chiffrement, m : message, c : chiffré (m^e % n) (m et c ne servent qu&#39;à vérifier d)</span>
+<span class="c1"># d (exposant de déchiffrement) doit vérifier :</span>
+<span class="c1"># d &lt; (1/3)n^(1/4)</span>
+<span class="c1"># d est alors le dénominateur d&#39;une fraction réduite de e/n</span>
+<span class="c1"># ici phi(n) est assimilé à n</span>
+<div class="viewcode-block" id="wiener1"><a class="viewcode-back" href="../pwnrsa.html#pwnrsa.wiener1">[docs]</a><span class="k">def</span> <span class="nf">wiener1</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Trivial implementation of Wiener&#39;s attack on RSA that uses a plain and a cipher to test potential private exponents.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: the modulo</span>
+<span class="sd">		- *e (int)*: public exponent</span>
+<span class="sd">		- *m (int)*: plain</span>
+<span class="sd">		- *c (int)*: cypher (m^e % n)</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *verbose (bool)*: set to True to get a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: the private exponent if the attack succeeded</span>
+<span class="sd">				   0 if attack failed</span>
+<span class="sd">	</span>
+<span class="sd">	For this attack to work, the private exponent d must be such that :</span>
+<span class="sd">		d &lt; (1/3)n^(1/4)</span>
+<span class="sd">		</span>
+<span class="sd">	d is then the denominator of a reduced fraction of e/n :</span>
+<span class="sd">		In this attack we assume Phi(n) ~ n.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+		
+	<span class="n">conv</span> <span class="o">=</span> <span class="n">gen_convergents</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">conv</span><span class="p">:</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;d prob =&quot;</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+		<span class="n">p</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pow =&quot;</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+		<span class="k">if</span>  <span class="n">p</span> <span class="o">==</span> <span class="n">m</span><span class="o">%</span><span class="n">n</span><span class="p">:</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">wiener : success!!!</span><span class="se">\n</span><span class="s2">Secret exponent :&quot;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">d</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">wiener failed :(</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+	<span class="k">return</span> <span class="mi">0</span></div>
+	
+<span class="c1">#wiener1(160523347, 60728973, 313, 75454098, True)</span>
+	
+<span class="c1">#Wiener sans utiliser de message, on vérifie d en calculant l&#39;indicatrice d&#39;Euler</span>
+<div class="viewcode-block" id="wiener2"><a class="viewcode-back" href="../pwnrsa.html#pwnrsa.wiener2">[docs]</a><span class="k">def</span> <span class="nf">wiener2</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Trivial implementation of Wiener&#39;s attack on RSA which computes Phi(n) to test potential private exponents.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: the modulo</span>
+<span class="sd">		- *e (int)*: public exponent</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *verbose (bool)*: set to True to get a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: the private exponent if the attack succeeded</span>
+<span class="sd">				0 if attack failed</span>
+<span class="sd">	</span>
+<span class="sd">	For this attack to work, the private exponent d must be such that :</span>
+<span class="sd">		d &lt; (1/3)n^(1/4)</span>
+<span class="sd">		</span>
+<span class="sd">	d is then the denominator of a reduced fraction of e/n :</span>
+<span class="sd">		In this attack we assume Phi(n) ~ n.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">conv</span> <span class="o">=</span> <span class="n">gen_convergents</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">conv</span><span class="p">:</span>
+		<span class="n">k</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">k</span><span class="o">!=</span><span class="mi">0</span><span class="p">):</span>
+			<span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="o">*</span><span class="n">d</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">k</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">t</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span><span class="k">print</span><span class="p">(</span><span class="s2">&quot;d prob :&quot;</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+				<span class="n">phi</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="o">*</span><span class="n">d</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="n">k</span>
+				<span class="n">p</span><span class="p">,</span><span class="n">q</span> <span class="o">=</span> <span class="n">get_pq</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">phi</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;p,q prob:&quot;</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+				<span class="k">if</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span><span class="p">):</span>
+					<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">wiener : success!!!</span><span class="se">\n</span><span class="s2">Secret exponent :&quot;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+					<span class="k">return</span> <span class="n">d</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">wiener failed :(</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+	
+<span class="c1">#wiener2(160523347, 60728973, True)</span>
+
+
+<div class="viewcode-block" id="weger1"><a class="viewcode-back" href="../pwnrsa.html#pwnrsa.weger1">[docs]</a><span class="k">def</span> <span class="nf">weger1</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Trivial implementation of Weger&#39;s attack on RSA that uses a plain and a cipher to test potential private exponents.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: the modulo</span>
+<span class="sd">		- *e (int)*: public exponent</span>
+<span class="sd">		- *m (int)*: plain</span>
+<span class="sd">		- *c (int)*: cypher (m^e % n)</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *verbose (bool)*: set to True to get a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: the private exponent if the attack succeeded</span>
+<span class="sd">				   0 if attack failed</span>
+<span class="sd">	</span>
+<span class="sd">	For this attack to work, the private exponent d must be such that :</span>
+<span class="sd">		d &lt; (n^(3/4))/abs(p-q)</span>
+<span class="sd">		p and q must close to each other.</span>
+<span class="sd">		</span>
+<span class="sd">	d is then the denominator of a reduced fraction of e/(n+1-2*sqrt(n)) :</span>
+<span class="sd">		In this attack we assume Phi(n) ~ (n+1-2*sqrt(n)) (since we assume p ~ q ~ sqrt(n))</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">conv</span> <span class="o">=</span> <span class="n">gen_convergents</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">itools</span><span class="o">.</span><span class="n">isqrt</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">e</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">conv</span><span class="p">:</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;d prob =&quot;</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+		<span class="n">p</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pow =&quot;</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+		<span class="k">if</span>  <span class="n">p</span> <span class="o">==</span> <span class="n">m</span><span class="o">%</span><span class="n">n</span><span class="p">:</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">weger : success!!!</span><span class="se">\n</span><span class="s2">Secret exponent :&quot;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">d</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">weger failed :(</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+	<span class="k">return</span> <span class="mi">0</span></div>
+	
+	
+<div class="viewcode-block" id="weger2"><a class="viewcode-back" href="../pwnrsa.html#pwnrsa.weger2">[docs]</a><span class="k">def</span> <span class="nf">weger2</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Trivial implementation of Weger&#39;s attack on RSA which computes Phi(n) to test potential private exponents.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: the modulo</span>
+<span class="sd">		- *e (int)*: public exponent</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *verbose (bool)*: set to True to get a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: the private exponent if the attack succeeded</span>
+<span class="sd">				0 if attack failed</span>
+<span class="sd">	</span>
+<span class="sd">	For this attack to work, the private exponent d must be such that :</span>
+<span class="sd">		d &lt; (n^(3/4))/abs(p-q)</span>
+<span class="sd">		p and q must close to each other.</span>
+<span class="sd">		</span>
+<span class="sd">	d is then the denominator of a reduced fraction of e/(n+1-2*sqrt(n)) :</span>
+<span class="sd">		In this attack we assume Phi(n) ~ (n+1-2*sqrt(n)) (since we assume p ~ q ~ sqrt(n))</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">conv</span> <span class="o">=</span> <span class="n">gen_convergents</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">itools</span><span class="o">.</span><span class="n">isqrt</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">e</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">conv</span><span class="p">:</span>
+		<span class="n">k</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">k</span><span class="o">!=</span><span class="mi">0</span><span class="p">):</span>
+			<span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="o">*</span><span class="n">d</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">k</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">t</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span><span class="k">print</span><span class="p">(</span><span class="s2">&quot;d prob :&quot;</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+				<span class="n">phi</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="o">*</span><span class="n">d</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="n">k</span>
+				<span class="n">p</span><span class="p">,</span><span class="n">q</span> <span class="o">=</span> <span class="n">get_pq</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">phi</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;p,q prob:&quot;</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+				<span class="k">if</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span><span class="p">):</span>
+					<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">weger : success!!!</span><span class="se">\n</span><span class="s2">Secret exponent :&quot;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+					<span class="k">return</span> <span class="n">d</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">weger failed :(</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+	
+<span class="c1">#instance on which Wiener fails but Weger succeeds.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">p = 10037</span>
+<span class="sd">q = 10039</span>
+<span class="sd">n = p*q</span>
+<span class="sd">phi = (p-1)*(q-1)</span>
+<span class="sd">d = 509</span>
+<span class="sd">e = itools.inversion_modulaire(d,phi)</span>
+<span class="sd">borne_wiener = (1/3) * (n**(0.25))</span>
+<span class="sd">borne_weger = (n**0.75)/abs(p-q)</span>
+<span class="sd">print(&quot;Borne Wiener :&quot;, borne_wiener,&quot;\nBorne Weger :&quot;, borne_weger)</span>
+<span class="sd">weger2(n,e,True)</span>
+<span class="sd">wiener2(n,e,True)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#sub-fonction for weger_ex</span>
+<span class="k">def</span> <span class="nf">sub_weger</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+	<span class="n">n</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">e</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+	<span class="n">amin</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+	<span class="n">amax</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+	<span class="n">B</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+	<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">amin</span><span class="p">,</span><span class="n">amax</span><span class="p">):</span>
+		<span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">B</span><span class="p">):</span>
+			<span class="n">x</span> <span class="o">=</span> <span class="n">a</span><span class="o">/</span><span class="n">b</span>
+			<span class="n">F</span> <span class="o">=</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span> <span class="o">-</span> <span class="p">((</span><span class="mi">2</span><span class="o">+</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">x</span><span class="p">))</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>		
+			<span class="n">conv</span> <span class="o">=</span> <span class="n">gen_convergents</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">conv</span><span class="p">:</span>
+				<span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+				<span class="n">d</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">k</span><span class="o">!=</span><span class="mi">0</span><span class="p">):</span>
+					<span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="o">*</span><span class="n">d</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">k</span>
+					<span class="k">if</span><span class="p">(</span><span class="n">t</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+						<span class="n">phi</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="o">*</span><span class="n">d</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="n">k</span>
+						<span class="n">p</span><span class="p">,</span><span class="n">q</span> <span class="o">=</span> <span class="n">get_pq</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">phi</span><span class="p">)</span>
+						<span class="k">if</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span><span class="p">):</span>
+							<span class="k">return</span> <span class="n">d</span>
+	<span class="k">return</span> <span class="mi">0</span>
+	
+<span class="c1">#Weger étendue, parallélisée</span>
+<span class="c1"># n : modulo, e : exposant chiffrement</span>
+<span class="c1"># n = pq avec p et q vérifiant :</span>
+<span class="c1"># q &lt; p &lt; 2q</span>
+<span class="c1"># p/q ~ 1 + a/b</span>
+<span class="c1"># a,b dans [0,B]</span>
+<span class="c1"># B borne définie par l&#39;utilisateur, la complexité étant proportionelle à B²</span>
+<div class="viewcode-block" id="weger_ex"><a class="viewcode-back" href="../pwnrsa.html#pwnrsa.weger_ex">[docs]</a><span class="k">def</span> <span class="nf">weger_ex</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">jobs</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Parallelized version of the extended Weger attack on RSA.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: the modulo</span>
+<span class="sd">		- *e (int)*: public exponent</span>
+<span class="sd">		- *B (int)*: user bound, time complexity is ~ O(B²)</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *jobs (int)*: number of threads to launch. Should be your number of virtual cores (htop to visualize).</span>
+<span class="sd">		- *verbose (bool)*: set to True to get a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: the private exponent if the attack succeeded</span>
+<span class="sd">				   0 if attack failed</span>
+<span class="sd">	</span>
+<span class="sd">	For this attack to work, n = pq must be such that :</span>
+<span class="sd">		q &lt; p &lt; 2p</span>
+<span class="sd">		p/q ~ 1 + a/b with a,b in [0,B]</span>
+<span class="sd">		</span>
+<span class="sd">	d is then the denominator of a reduced fraction of e/F, where F is such that :</span>
+<span class="sd">		F = n+1 - ((2+a/b)/sqrt(1+a/b))*sqrt(n)</span>
+<span class="sd">		In this attack we assume Phi(n) ~ n+1 - ((2+a/b)/sqrt(1+a/b))*sqrt(n)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">map_args</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">jobs</span><span class="p">):</span>
+		<span class="n">amin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">j</span><span class="o">/</span><span class="n">jobs</span><span class="p">)</span><span class="o">*</span><span class="n">B</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">amax</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">jobs</span><span class="p">)</span><span class="o">*</span><span class="n">B</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">map_args</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">n</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">amin</span><span class="p">,</span><span class="n">amax</span><span class="p">,</span><span class="n">B</span><span class="p">])</span>
+	
+	<span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">jobs</span><span class="p">)</span>
+	<span class="n">Ld</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">sub_weger</span><span class="p">,</span> <span class="n">map_args</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">Ld</span><span class="p">:</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">d</span><span class="o">!=</span><span class="mi">0</span><span class="p">):</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">weger extended : success!!!</span><span class="se">\n</span><span class="s2">Secret exponent :&quot;</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">d</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">weger extended failed :(</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+	
+<span class="c1">#instances aléatoires dont la taille fait que Wiener et Weger échouent alors que Weger étendue fonctionne (la plupart du temps)</span>
+
+<span class="c1">#q = itools.rand_prime(100000000000,200000000000,20)</span>
+<span class="c1">#p = itools.rand_prime(100000000000,200000000000,20)</span>
+<span class="c1">#n = p*q</span>
+<span class="c1">#print(&quot;\nn =&quot;,n)</span>
+<span class="c1">#phi = (p-1)*(q-1)</span>
+<span class="c1">#d = 50077069</span>
+<span class="c1">#print(&quot;d = n^&quot;, math.log(d)/math.log(n))</span>
+<span class="c1">#print(&quot;(p-q)d = n^&quot;, math.log(abs(p-q)*d)/math.log(n),&quot;\n\n&quot;)</span>
+<span class="c1">#e = itools.inversion_modulaire(d,phi)</span>
+
+<span class="c1">#wiener2(n,e,True)</span>
+<span class="c1">#weger2(n,e,True)</span>
+<span class="c1">#weger_ex(n,e,800,8,True)</span>
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Amaury Behague, Raphaël Roblin.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
