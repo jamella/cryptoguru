@@ -12,20 +12,14 @@ Modules Documentation
 *********************
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    
    itools
    pyfacto
    pwnrsa
    pwndlp
 
-
-Navigation
-**********
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. include:: nav.rst
 
 
 

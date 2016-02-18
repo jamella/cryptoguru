@@ -1,7 +1,8 @@
-itools : useful integer fonctions
-*********************************
+**itools** : *useful integer fonctions*
+***************************************
+
+.. include:: nav.rst
 
 .. automodule:: itools
 	:members:
-	
-.. include:: nav.rst
+

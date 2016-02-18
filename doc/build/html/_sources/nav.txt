@@ -1,7 +1,4 @@
-Navigation
-----------
-
-* :ref:`index`
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+:ref:`index` |
+:ref:`genindex` |
+:ref:`modindex` |
+:ref:`search` |

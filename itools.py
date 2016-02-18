@@ -42,11 +42,11 @@ def gcd(a, b):
 	"""Computes the greatest common divisor.
 	
 	Args:
-		a (int): some integer
-		b (int): some integer
+		- *a (int)*: some integer
+		- *b (int)*: some integer
 	
 	Returns:
-		(int) The GCD.
+		- *(int)*: The GCD.
 	"""
 	
 	while(b!=0):
@@ -57,14 +57,14 @@ def euclide_extended(a, b, verbose=False):
 	"""Extended version of Euclide's algorithm.
 	
 	Args:
-		a (int): some integer
-		b (int): some integer
+		- *a (int)*: some integer
+		- *b (int)*: some integer
 	
 	Optional args:
-		verbose (bool): Set to True to get a display
+		- *verbose (bool)*: Set to True to get a display
 		
 	Returns:
-		(int,int,int) Three integers, the first one is the gcd, the others are Bezout coefs.
+		- *(int,int,int)*: Three integers, the first one is the gcd, the others are Bezout coefs.
 	
 	It doesn't matter if a<b, the algorithm switches a and b if necessary.
 	However, if a < b, the first coefficient returned will be the one associated to b (gcd,coef_b,coef_a).
@@ -112,12 +112,12 @@ def inversion_modulaire(a, p):
 	"""Inverts a mod p.
 	
 	Args:
-		a (int): some integer
-		p (int): some integer, greater than a
+		- *a (int)*: some integer
+		- *p (int)*: some integer, greater than a
 		
 	Returns:
-		(int) 1/a mod p if gcd(a,p) = 1
-			  0 if gcd(a,p) > 1
+		- *(int)*: 1/a mod p if gcd(a,p) = 1
+			 	   0 if gcd(a,p) > 1
 	"""
 	
 	pgcd, u, v = euclide_extended(a%p, p, False)
@@ -137,17 +137,17 @@ def crt(La, Ln, N=0):
 	X is computed modulo N which is the product of the elements of Ln.
 	
 	Args:
-		La (List): a list of integers
-		Ln (List): a list of integers, which size must be len(La).
+		- *La (List)*: a list of integers
+		- *Ln (List)*: a list of integers, which size must be len(La).
 		
 	Optional args:
-		N (int): the final modulo. Will be computed if omitted.
+		- *N (int)*: the final modulo. Will be computed if omitted.
 		
 	Returns:
-		(int) the result of the reconstruction modulo N.
+		- *(int)*: the result of the reconstruction modulo N.
 		
 	For all i, the following statement should be true :
-	La[i] < Ln[i]
+		La[i] < Ln[i]
 	
 	"""
 	
@@ -180,12 +180,12 @@ def exp_mod(a, n, p):
 	"""An efficient function to compute a^n mod p.
 	
 	Args:
-		a (int): an integer
-		n (int): an integer
-		p (int): an integer > a
+		- *a (int)*: an integer
+		- *n (int)*: an integer
+		- *p (int)*: an integer > a
 		
 	Returns:
-		int. a^n mod p
+		- *(int)*: a^n mod p
 	
 	Actually just a custom implementation of fastexp. Uses the binary decomposition of n.
 	"""
@@ -207,10 +207,10 @@ def isqrt(n):
 	"""Integer Square Root.
 	
 	Args:
-		n (int): an integer
+		- *n (int)*: an integer
 		
 	Returns:
-		int. The greatest int s such that s*s <= n.
+		- *(int)*: The greatest int s such that s*s <= n.
 		
 	Uses Newton's iterative method.
 	"""
@@ -227,11 +227,11 @@ def ilog(x, b):
 	"""Integer logarithm in base b.
 	
 	Args:
-		x (int): an integer
-		b (int): a base
+		- *x (int)*: an integer
+		- *b (int)*: a base
 	
 	Returns:
-		int. The greatest integer l such that b**l <= x.
+		- *(int)*: The greatest integer l such that b**l <= x.
 		
 	"""
 	
@@ -270,11 +270,14 @@ def rabin_miller(n,k=1,verbose=False):
 	"""Rabin-Miller primality test.
 	
 	Args:
-		n (int) : the integer which primality you wish to test
+		- *n (int)*: the integer which primality you wish to test
 	
 	Optional Args:
-		k (int) : number of repetitions of the test
-		verbose (boot) : set to True if you want a display
+		- *k (int)*: number of repetitions of the test
+		- *verbose (boot)*: set to True if you want a display
+		
+	Returns:
+		- *(bool)*: True is n is a pseudo-prime, False if n isn't prime.
 		
 	If this test returns False, you are 100% sure that n isn't prime.
 	However, if this test returns True, there's a probability of 1/(2**k) that n isn't prime.
@@ -301,15 +304,15 @@ def get_primes(a,b,k,verbose=False):
 	"""Computes the list of primes between two integers.
 	
 	Args:
-		a (int): an integer
-		b (int): an integer such as b > a
-		k (int): the number of repetitions Rabin-Miller primality test.
+		- *a (int)*: an integer
+		- *b (int)*: an integer such as b > a
+		- *k (int)*: the number of repetitions Rabin-Miller primality test.
 		
 	Optional Args:
-		verbose (bool): set to True if you want a display.
+		- *verbose (bool)*: set to True if you want a display.
 		
 	Returns:
-		(List) the list of pseudo-prime integers in [a,b[
+		- *(List)*: the list of pseudo-prime integers in [a,b[
 	
 	Why "pseudo-prime"? Because you can never be sure that they are prime with RM primality test.
 	"""
@@ -334,15 +337,15 @@ def rand_prime(a,b,k,verbose=False):
 	"""Generates a random prime number between two integers.
 	
 	Args:
-		a (int): an integer
-		b (int): an integer such as b > a
-		k (int): the number of repetitions Rabin-Miller primality test.
+		- *a (int)*: an integer
+		- *b (int)*: an integer such as b > a
+		- *k (int)*: the number of repetitions Rabin-Miller primality test.
 		
 	Optional Args:
-		verbose (bool): set to True if you want a display.
+		- *verbose (bool)*: set to True if you want a display.
 		
 	Returns:
-		(int) a random pseudo-prime between a and b.
+		- *(int)*: a random pseudo-prime between a and b.
 		
 	Why "pseudo-prime"? Because you can never be sure that they are prime with RM primality test.
 	"""
@@ -384,13 +387,13 @@ def get_group(n, verbose=False):
 	"""Generates a "safe" group for the DLP
 	
 	Args:
-		n (int): a prime integer : security modulo / prime seed
+		- *n (int)*: a prime integer : security modulo / prime seed
 		
 	Optional Args:
-		verbose (bool): set to True if you want a display.
+		- *verbose (bool)*: set to True if you want a display.
 		
 	Returns:
-		(int,int) g,p with p a prime integer such that p = k*n with some small integer k. And g is a generator of Z/pZ*
+		- *(int,int)*: g,p with p a prime integer such that p = k*n with some small integer k. And g is a generator of Z/pZ*
 		
 	"""
 	

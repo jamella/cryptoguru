@@ -1,7 +1,7 @@
-pwndlp : efficient attacks on the DLP
-*************************************
+**pwndlp** : *efficient attacks on the DLP*
+*******************************************
+
+.. include:: nav.rst
 
 .. automodule:: pwndlp
 	:members:
-	
-.. include:: nav.rst

@@ -83,11 +83,11 @@
 	<span class="sd">&quot;&quot;&quot;Computes the greatest common divisor.</span>
 <span class="sd">	</span>
 <span class="sd">	Args:</span>
-<span class="sd">		a (int): some integer</span>
-<span class="sd">		b (int): some integer</span>
+<span class="sd">		- *a (int)*: some integer</span>
+<span class="sd">		- *b (int)*: some integer</span>
 <span class="sd">	</span>
 <span class="sd">	Returns:</span>
-<span class="sd">		(int) The GCD.</span>
+<span class="sd">		- *(int)*: The GCD.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="k">while</span><span class="p">(</span><span class="n">b</span><span class="o">!=</span><span class="mi">0</span><span class="p">):</span>
@@ -98,14 +98,14 @@
 	<span class="sd">&quot;&quot;&quot;Extended version of Euclide&#39;s algorithm.</span>
 <span class="sd">	</span>
 <span class="sd">	Args:</span>
-<span class="sd">		a (int): some integer</span>
-<span class="sd">		b (int): some integer</span>
+<span class="sd">		- *a (int)*: some integer</span>
+<span class="sd">		- *b (int)*: some integer</span>
 <span class="sd">	</span>
 <span class="sd">	Optional args:</span>
-<span class="sd">		verbose (bool): Set to True to get a display</span>
+<span class="sd">		- *verbose (bool)*: Set to True to get a display</span>
 <span class="sd">		</span>
 <span class="sd">	Returns:</span>
-<span class="sd">		(int,int,int) Three integers, the first one is the gcd, the others are Bezout coefs.</span>
+<span class="sd">		- *(int,int,int)*: Three integers, the first one is the gcd, the others are Bezout coefs.</span>
 <span class="sd">	</span>
 <span class="sd">	It doesn&#39;t matter if a&lt;b, the algorithm switches a and b if necessary.</span>
 <span class="sd">	However, if a &lt; b, the first coefficient returned will be the one associated to b (gcd,coef_b,coef_a).</span>
@@ -153,12 +153,12 @@
 	<span class="sd">&quot;&quot;&quot;Inverts a mod p.</span>
 <span class="sd">	</span>
 <span class="sd">	Args:</span>
-<span class="sd">		a (int): some integer</span>
-<span class="sd">		p (int): some integer, greater than a</span>
+<span class="sd">		- *a (int)*: some integer</span>
+<span class="sd">		- *p (int)*: some integer, greater than a</span>
 <span class="sd">		</span>
 <span class="sd">	Returns:</span>
-<span class="sd">		(int) 1/a mod p if gcd(a,p) = 1</span>
-<span class="sd">			  0 if gcd(a,p) &gt; 1</span>
+<span class="sd">		- *(int)*: 1/a mod p if gcd(a,p) = 1</span>
+<span class="sd">			 	   0 if gcd(a,p) &gt; 1</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="n">pgcd</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">euclide_extended</span><span class="p">(</span><span class="n">a</span><span class="o">%</span><span class="n">p</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
@@ -178,17 +178,17 @@
 <span class="sd">	X is computed modulo N which is the product of the elements of Ln.</span>
 <span class="sd">	</span>
 <span class="sd">	Args:</span>
-<span class="sd">		La (List): a list of integers</span>
-<span class="sd">		Ln (List): a list of integers, which size must be len(La).</span>
+<span class="sd">		- *La (List)*: a list of integers</span>
+<span class="sd">		- *Ln (List)*: a list of integers, which size must be len(La).</span>
 <span class="sd">		</span>
 <span class="sd">	Optional args:</span>
-<span class="sd">		N (int): the final modulo. Will be computed if omitted.</span>
+<span class="sd">		- *N (int)*: the final modulo. Will be computed if omitted.</span>
 <span class="sd">		</span>
 <span class="sd">	Returns:</span>
-<span class="sd">		(int) the result of the reconstruction modulo N.</span>
+<span class="sd">		- *(int)*: the result of the reconstruction modulo N.</span>
 <span class="sd">		</span>
 <span class="sd">	For all i, the following statement should be true :</span>
-<span class="sd">	La[i] &lt; Ln[i]</span>
+<span class="sd">		La[i] &lt; Ln[i]</span>
 <span class="sd">	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
@@ -221,12 +221,12 @@
 	<span class="sd">&quot;&quot;&quot;An efficient function to compute a^n mod p.</span>
 <span class="sd">	</span>
 <span class="sd">	Args:</span>
-<span class="sd">		a (int): an integer</span>
-<span class="sd">		n (int): an integer</span>
-<span class="sd">		p (int): an integer &gt; a</span>
+<span class="sd">		- *a (int)*: an integer</span>
+<span class="sd">		- *n (int)*: an integer</span>
+<span class="sd">		- *p (int)*: an integer &gt; a</span>
 <span class="sd">		</span>
 <span class="sd">	Returns:</span>
-<span class="sd">		int. a^n mod p</span>
+<span class="sd">		- *(int)*: a^n mod p</span>
 <span class="sd">	</span>
 <span class="sd">	Actually just a custom implementation of fastexp. Uses the binary decomposition of n.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
@@ -248,10 +248,10 @@
 	<span class="sd">&quot;&quot;&quot;Integer Square Root.</span>
 <span class="sd">	</span>
 <span class="sd">	Args:</span>
-<span class="sd">		n (int): an integer</span>
+<span class="sd">		- *n (int)*: an integer</span>
 <span class="sd">		</span>
 <span class="sd">	Returns:</span>
-<span class="sd">		int. The greatest int s such that s*s &lt;= n.</span>
+<span class="sd">		- *(int)*: The greatest int s such that s*s &lt;= n.</span>
 <span class="sd">		</span>
 <span class="sd">	Uses Newton&#39;s iterative method.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
@@ -268,11 +268,11 @@
 	<span class="sd">&quot;&quot;&quot;Integer logarithm in base b.</span>
 <span class="sd">	</span>
 <span class="sd">	Args:</span>
-<span class="sd">		x (int): an integer</span>
-<span class="sd">		b (int): a base</span>
+<span class="sd">		- *x (int)*: an integer</span>
+<span class="sd">		- *b (int)*: a base</span>
 <span class="sd">	</span>
 <span class="sd">	Returns:</span>
-<span class="sd">		int. The greatest integer l such that b**l &lt;= x.</span>
+<span class="sd">		- *(int)*: The greatest integer l such that b**l &lt;= x.</span>
 <span class="sd">		</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
@@ -311,11 +311,14 @@
 	<span class="sd">&quot;&quot;&quot;Rabin-Miller primality test.</span>
 <span class="sd">	</span>
 <span class="sd">	Args:</span>
-<span class="sd">		n (int) : the integer which primality you wish to test</span>
+<span class="sd">		- *n (int)*: the integer which primality you wish to test</span>
 <span class="sd">	</span>
 <span class="sd">	Optional Args:</span>
-<span class="sd">		k (int) : number of repetitions of the test</span>
-<span class="sd">		verbose (boot) : set to True if you want a display</span>
+<span class="sd">		- *k (int)*: number of repetitions of the test</span>
+<span class="sd">		- *verbose (boot)*: set to True if you want a display</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(bool)*: True is n is a pseudo-prime, False if n isn&#39;t prime.</span>
 <span class="sd">		</span>
 <span class="sd">	If this test returns False, you are 100% sure that n isn&#39;t prime.</span>
 <span class="sd">	However, if this test returns True, there&#39;s a probability of 1/(2**k) that n isn&#39;t prime.</span>
@@ -342,15 +345,15 @@
 	<span class="sd">&quot;&quot;&quot;Computes the list of primes between two integers.</span>
 <span class="sd">	</span>
 <span class="sd">	Args:</span>
-<span class="sd">		a (int): an integer</span>
-<span class="sd">		b (int): an integer such as b &gt; a</span>
-<span class="sd">		k (int): the number of repetitions Rabin-Miller primality test.</span>
+<span class="sd">		- *a (int)*: an integer</span>
+<span class="sd">		- *b (int)*: an integer such as b &gt; a</span>
+<span class="sd">		- *k (int)*: the number of repetitions Rabin-Miller primality test.</span>
 <span class="sd">		</span>
 <span class="sd">	Optional Args:</span>
-<span class="sd">		verbose (bool): set to True if you want a display.</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
 <span class="sd">		</span>
 <span class="sd">	Returns:</span>
-<span class="sd">		(List) the list of pseudo-prime integers in [a,b[</span>
+<span class="sd">		- *(List)*: the list of pseudo-prime integers in [a,b[</span>
 <span class="sd">	</span>
 <span class="sd">	Why &quot;pseudo-prime&quot;? Because you can never be sure that they are prime with RM primality test.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
@@ -375,15 +378,15 @@
 	<span class="sd">&quot;&quot;&quot;Generates a random prime number between two integers.</span>
 <span class="sd">	</span>
 <span class="sd">	Args:</span>
-<span class="sd">		a (int): an integer</span>
-<span class="sd">		b (int): an integer such as b &gt; a</span>
-<span class="sd">		k (int): the number of repetitions Rabin-Miller primality test.</span>
+<span class="sd">		- *a (int)*: an integer</span>
+<span class="sd">		- *b (int)*: an integer such as b &gt; a</span>
+<span class="sd">		- *k (int)*: the number of repetitions Rabin-Miller primality test.</span>
 <span class="sd">		</span>
 <span class="sd">	Optional Args:</span>
-<span class="sd">		verbose (bool): set to True if you want a display.</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
 <span class="sd">		</span>
 <span class="sd">	Returns:</span>
-<span class="sd">		(int) a random pseudo-prime between a and b.</span>
+<span class="sd">		- *(int)*: a random pseudo-prime between a and b.</span>
 <span class="sd">		</span>
 <span class="sd">	Why &quot;pseudo-prime&quot;? Because you can never be sure that they are prime with RM primality test.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
@@ -425,13 +428,13 @@
 	<span class="sd">&quot;&quot;&quot;Generates a &quot;safe&quot; group for the DLP</span>
 <span class="sd">	</span>
 <span class="sd">	Args:</span>
-<span class="sd">		n (int): a prime integer : security modulo / prime seed</span>
+<span class="sd">		- *n (int)*: a prime integer : security modulo / prime seed</span>
 <span class="sd">		</span>
 <span class="sd">	Optional Args:</span>
-<span class="sd">		verbose (bool): set to True if you want a display.</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
 <span class="sd">		</span>
 <span class="sd">	Returns:</span>
-<span class="sd">		(int,int) g,p with p a prime integer such that p = k*n with some small integer k. And g is a generator of Z/pZ*</span>
+<span class="sd">		- *(int,int)*: g,p with p a prime integer such that p = k*n with some small integer k. And g is a generator of Z/pZ*</span>
 <span class="sd">		</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	

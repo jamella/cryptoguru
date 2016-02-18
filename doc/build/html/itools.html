@@ -39,24 +39,37 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-itools">
-<span id="itools-useful-integer-fonctions"></span><h1>itools : useful integer fonctions<a class="headerlink" href="#module-itools" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
+  <div class="section" id="itools-useful-integer-fonctions">
+<h1><strong>itools</strong> : <em>useful integer fonctions</em><a class="headerlink" href="#itools-useful-integer-fonctions" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference internal" href="index.html#index"><span>Home : cryptoguru&#8217;s documentation</span></a> |
+<a class="reference internal" href="genindex.html"><span>Index</span></a>&nbsp;|
+<a class="reference internal" href="py-modindex.html"><span>Module Index</span></a> |
+<a class="reference internal" href="search.html"><span>Search Page</span></a> |</p>
+<span class="target" id="module-itools"></span><dl class="function">
 <dt id="itools.crt">
 <code class="descclassname">itools.</code><code class="descname">crt</code><span class="sig-paren">(</span><em>La</em>, <em>Ln</em>, <em>N=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/itools.html#crt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#itools.crt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses the Chinese Remainder Theorem to deduct X = La[i] mod Ln[i] for all i &lt; len(La) = len(Ln)
 X is computed modulo N which is the product of the elements of Ln.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>La (List): a list of integers
-Ln (List): a list of integers, which size must be len(La).</dd>
+<dd><ul class="first last simple">
+<li><em>La (List)</em>: a list of integers</li>
+<li><em>Ln (List)</em>: a list of integers, which size must be len(La).</li>
+</ul>
+</dd>
 <dt>Optional args:</dt>
-<dd>N (int): the final modulo. Will be computed if omitted.</dd>
+<dd><ul class="first last simple">
+<li><em>N (int)</em>: the final modulo. Will be computed if omitted.</li>
+</ul>
+</dd>
 <dt>Returns:</dt>
-<dd>(int) the result of the reconstruction modulo N.</dd>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: the result of the reconstruction modulo N.</li>
+</ul>
+</dd>
+<dt>For all i, the following statement should be true :</dt>
+<dd>La[i] &lt; Ln[i]</dd>
 </dl>
-<p>For all i, the following statement should be true :
-La[i] &lt; Ln[i]</p>
 </dd></dl>
 
 <dl class="function">
@@ -65,12 +78,21 @@ La[i] &lt; Ln[i]</p>
 <dd><p>Extended version of Euclide&#8217;s algorithm.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>a (int): some integer
-b (int): some integer</dd>
+<dd><ul class="first last simple">
+<li><em>a (int)</em>: some integer</li>
+<li><em>b (int)</em>: some integer</li>
+</ul>
+</dd>
 <dt>Optional args:</dt>
-<dd>verbose (bool): Set to True to get a display</dd>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: Set to True to get a display</li>
+</ul>
+</dd>
 <dt>Returns:</dt>
-<dd>(int,int,int) Three integers, the first one is the gcd, the others are Bezout coefs.</dd>
+<dd><ul class="first last simple">
+<li><em>(int,int,int)</em>: Three integers, the first one is the gcd, the others are Bezout coefs.</li>
+</ul>
+</dd>
 </dl>
 <p>It doesn&#8217;t matter if a&lt;b, the algorithm switches a and b if necessary.
 However, if a &lt; b, the first coefficient returned will be the one associated to b (gcd,coef_b,coef_a).</p>
@@ -82,11 +104,17 @@ However, if a &lt; b, the first coefficient returned will be the one associated 
 <dd><p>An efficient function to compute a^n mod p.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>a (int): an integer
-n (int): an integer
-p (int): an integer &gt; a</dd>
+<dd><ul class="first last simple">
+<li><em>a (int)</em>: an integer</li>
+<li><em>n (int)</em>: an integer</li>
+<li><em>p (int)</em>: an integer &gt; a</li>
+</ul>
+</dd>
 <dt>Returns:</dt>
-<dd>int. a^n mod p</dd>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: a^n mod p</li>
+</ul>
+</dd>
 </dl>
 <p>Actually just a custom implementation of fastexp. Uses the binary decomposition of n.</p>
 </dd></dl>
@@ -97,10 +125,16 @@ p (int): an integer &gt; a</dd>
 <dd><p>Computes the greatest common divisor.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>a (int): some integer
-b (int): some integer</dd>
+<dd><ul class="first last simple">
+<li><em>a (int)</em>: some integer</li>
+<li><em>b (int)</em>: some integer</li>
+</ul>
+</dd>
 <dt>Returns:</dt>
-<dd>(int) The GCD.</dd>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: The GCD.</li>
+</ul>
+</dd>
 </dl>
 </dd></dl>
 
@@ -110,11 +144,20 @@ b (int): some integer</dd>
 <dd><p>Generates a &#8220;safe&#8221; group for the DLP</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>n (int): a prime integer : security modulo / prime seed</dd>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: a prime integer : security modulo / prime seed</li>
+</ul>
+</dd>
 <dt>Optional Args:</dt>
-<dd>verbose (bool): set to True if you want a display.</dd>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
 <dt>Returns:</dt>
-<dd>(int,int) g,p with p a prime integer such that p = k*n with some small integer k. And g is a generator of Z/pZ*</dd>
+<dd><ul class="first last simple">
+<li><em>(int,int)</em>: g,p with p a prime integer such that p = k*n with some small integer k. And g is a generator of Z/pZ*</li>
+</ul>
+</dd>
 </dl>
 </dd></dl>
 
@@ -124,13 +167,22 @@ b (int): some integer</dd>
 <dd><p>Computes the list of primes between two integers.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>a (int): an integer
-b (int): an integer such as b &gt; a
-k (int): the number of repetitions Rabin-Miller primality test.</dd>
+<dd><ul class="first last simple">
+<li><em>a (int)</em>: an integer</li>
+<li><em>b (int)</em>: an integer such as b &gt; a</li>
+<li><em>k (int)</em>: the number of repetitions Rabin-Miller primality test.</li>
+</ul>
+</dd>
 <dt>Optional Args:</dt>
-<dd>verbose (bool): set to True if you want a display.</dd>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
 <dt>Returns:</dt>
-<dd>(List) the list of pseudo-prime integers in [a,b[</dd>
+<dd><ul class="first last simple">
+<li><em>(List)</em>: the list of pseudo-prime integers in [a,b[</li>
+</ul>
+</dd>
 </dl>
 <p>Why &#8220;pseudo-prime&#8221;? Because you can never be sure that they are prime with RM primality test.</p>
 </dd></dl>
@@ -141,10 +193,16 @@ k (int): the number of repetitions Rabin-Miller primality test.</dd>
 <dd><p>Integer logarithm in base b.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>x (int): an integer
-b (int): a base</dd>
+<dd><ul class="first last simple">
+<li><em>x (int)</em>: an integer</li>
+<li><em>b (int)</em>: a base</li>
+</ul>
+</dd>
 <dt>Returns:</dt>
-<dd>int. The greatest integer l such that b**l &lt;= x.</dd>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: The greatest integer l such that b**l &lt;= x.</li>
+</ul>
+</dd>
 </dl>
 </dd></dl>
 
@@ -154,13 +212,20 @@ b (int): a base</dd>
 <dd><p>Inverts a mod p.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>a (int): some integer
-p (int): some integer, greater than a</dd>
+<dd><ul class="first last simple">
+<li><em>a (int)</em>: some integer</li>
+<li><em>p (int)</em>: some integer, greater than a</li>
+</ul>
+</dd>
 <dt>Returns:</dt>
-<dd><dl class="first last docutils">
-<dt>(int) 1/a mod p if gcd(a,p) = 1</dt>
-<dd>0 if gcd(a,p) &gt; 1</dd>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>(int)</em>: 1/a mod p if gcd(a,p) = 1</dt>
+<dd><p class="first last">0 if gcd(a,p) &gt; 1</p>
+</dd>
 </dl>
+</li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -171,9 +236,15 @@ p (int): some integer, greater than a</dd>
 <dd><p>Integer Square Root.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>n (int): an integer</dd>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: an integer</li>
+</ul>
+</dd>
 <dt>Returns:</dt>
-<dd>int. The greatest int s such that s*s &lt;= n.</dd>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: The greatest int s such that s*s &lt;= n.</li>
+</ul>
+</dd>
 </dl>
 <p>Uses Newton&#8217;s iterative method.</p>
 </dd></dl>
@@ -184,10 +255,21 @@ p (int): some integer, greater than a</dd>
 <dd><p>Rabin-Miller primality test.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>n (int) : the integer which primality you wish to test</dd>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: the integer which primality you wish to test</li>
+</ul>
+</dd>
 <dt>Optional Args:</dt>
-<dd>k (int) : number of repetitions of the test
-verbose (boot) : set to True if you want a display</dd>
+<dd><ul class="first last simple">
+<li><em>k (int)</em>: number of repetitions of the test</li>
+<li><em>verbose (boot)</em>: set to True if you want a display</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li><em>(bool)</em>: True is n is a pseudo-prime, False if n isn&#8217;t prime.</li>
+</ul>
+</dd>
 </dl>
 <p>If this test returns False, you are 100% sure that n isn&#8217;t prime.
 However, if this test returns True, there&#8217;s a probability of 1/(2**k) that n isn&#8217;t prime.</p>
@@ -199,26 +281,26 @@ However, if this test returns True, there&#8217;s a probability of 1/(2**k) that
 <dd><p>Generates a random prime number between two integers.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>a (int): an integer
-b (int): an integer such as b &gt; a
-k (int): the number of repetitions Rabin-Miller primality test.</dd>
+<dd><ul class="first last simple">
+<li><em>a (int)</em>: an integer</li>
+<li><em>b (int)</em>: an integer such as b &gt; a</li>
+<li><em>k (int)</em>: the number of repetitions Rabin-Miller primality test.</li>
+</ul>
+</dd>
 <dt>Optional Args:</dt>
-<dd>verbose (bool): set to True if you want a display.</dd>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
 <dt>Returns:</dt>
-<dd>(int) a random pseudo-prime between a and b.</dd>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: a random pseudo-prime between a and b.</li>
+</ul>
+</dd>
 </dl>
 <p>Why &#8220;pseudo-prime&#8221;? Because you can never be sure that they are prime with RM primality test.</p>
 </dd></dl>
 
-<div class="section" id="navigation">
-<h2>Navigation<a class="headerlink" href="#navigation" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><a class="reference internal" href="index.html#index"><span>Home : cryptoguru&#8217;s documentation</span></a></li>
-<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
-</ul>
-</div>
 </div>
 
 
@@ -226,20 +308,12 @@ k (int): the number of repetitions Rabin-Miller primality test.</dd>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">itools : useful integer fonctions</a><ul>
-<li><a class="reference internal" href="#navigation">Navigation</a></li>
-</ul>
-</li>
-</ul>
-<div class="relations">
+        <div class="sphinxsidebarwrapper"><div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">Home : cryptoguru&#8217;s documentation</a></li>
-      <li>Next: <a href="pyfacto.html" title="next chapter">pyfacto : factor small to large integers</a></li>
+      <li>Next: <a href="pyfacto.html" title="next chapter"><strong>pyfacto</strong> : <em>factor small to large integers</em></a></li>
   </ul></li>
 </ul>
 </div>
