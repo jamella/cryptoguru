@@ -25,6 +25,14 @@ __version__ = "3"
 __email__ = "amaury.behague@gmail.com"
 __status__ = "Beta"
 
+"""
+.. module:: pwnrsa
+	:platform: Unix
+	:synopsis: Efficient attacks on RSA.
+	
+.. moduleauthor:: Amaury Behague <amaury.behague@gmail.com>
+"""
+
 
 import itools, math
 from multiprocessing import Pool
@@ -228,19 +236,19 @@ def weger_ex(n,e,B,jobs=8,verbose=False):
 	
 #instances aléatoires dont la taille fait que Wiener et Weger échouent alors que Weger étendue fonctionne (la plupart du temps)
 
-q = itools.rand_prime(100000000000,200000000000,20)
-p = itools.rand_prime(100000000000,200000000000,20)
-n = p*q
-print("\nn =",n)
-phi = (p-1)*(q-1)
-d = 50077069
-print("d = n^", math.log(d)/math.log(n))
-print("(p-q)d = n^", math.log(abs(p-q)*d)/math.log(n),"\n\n")
-e = itools.inversion_modulaire(d,phi)
+#q = itools.rand_prime(100000000000,200000000000,20)
+#p = itools.rand_prime(100000000000,200000000000,20)
+#n = p*q
+#print("\nn =",n)
+#phi = (p-1)*(q-1)
+#d = 50077069
+#print("d = n^", math.log(d)/math.log(n))
+#print("(p-q)d = n^", math.log(abs(p-q)*d)/math.log(n),"\n\n")
+#e = itools.inversion_modulaire(d,phi)
 
-wiener2(n,e,True)
-weger2(n,e,True)
-weger_ex(n,e,800,8,True)
+#wiener2(n,e,True)
+#weger2(n,e,True)
+#weger_ex(n,e,800,8,True)
 
 
 

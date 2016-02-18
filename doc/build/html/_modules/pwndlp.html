@@ -1,0 +1,369 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pwndlp &mdash; cryptoguru Beta documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'Beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="cryptoguru Beta documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pwndlp</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (C) 2016 Amaury Behague &lt;amaury.behague@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of cryptoguru.</span>
+<span class="c1">#</span>
+<span class="c1"># cryptopwn is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Amaury Behague&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2016, Amaury Behague&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;GPL&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;3&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;amaury.behague@gmail.com&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Beta&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: pwndlp</span>
+<span class="sd">	:platform: Unix</span>
+<span class="sd">	:synopsis: Efficient Attacks on the DLP.</span>
+<span class="sd">	</span>
+<span class="sd">.. moduleauthor:: Amaury Behague &lt;amaury.behague@gmail.com&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">itools</span><span class="o">,</span> <span class="nn">random</span><span class="o">,</span> <span class="nn">pyfacto</span><span class="o">,</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Queue</span>
+
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">()</span>
+
+<span class="c1">#retourne x tel que [x]g = h mod n</span>
+<span class="c1">#p : ordre du groupe dont g est le générateur</span>
+<span class="c1">#pré-requis : p premier, h dans &lt;g&gt;</span>
+<div class="viewcode-block" id="rho_pollard_dlp"><a class="viewcode-back" href="../pwndlp.html#pwndlp.rho_pollard_dlp">[docs]</a><span class="k">def</span> <span class="nf">rho_pollard_dlp</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Pollard&#39;s Rho applied to DLP.&quot;&quot;&quot;</span>
+	
+	<span class="c1">#brute force pour commencer</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Brute forcing..&quot;</span><span class="p">)</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="n">g</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">min</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">)):</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">g</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="o">==</span><span class="n">h</span><span class="p">):</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho_pollard_dlp :</span><span class="se">\n</span><span class="s2">[&quot;</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;]&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+	
+	<span class="c1">#puis rho standard</span>
+	<span class="n">S0</span> <span class="o">=</span> <span class="n">n</span><span class="o">//</span><span class="mi">3</span>
+	<span class="n">S1</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">//</span><span class="mi">3</span><span class="p">)</span>
+	<span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">y</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;starting new walk..&quot;</span><span class="p">)</span>
+		<span class="n">gx</span><span class="p">,</span> <span class="n">hx</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">p</span><span class="p">),</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="p">(</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="n">gx</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">hx</span><span class="p">,</span><span class="n">n</span><span class="p">)</span> <span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+		<span class="n">gy</span><span class="p">,</span> <span class="n">hy</span> <span class="o">=</span> <span class="n">gx</span><span class="p">,</span> <span class="n">hx</span>
+		<span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+	
+		<span class="n">loop</span> <span class="o">=</span> <span class="bp">True</span>
+	
+		<span class="k">while</span><span class="p">(</span><span class="n">loop</span><span class="p">):</span>
+			<span class="c1">#x[i]</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">S0</span><span class="p">):</span>
+				<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">h</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+				<span class="n">hx</span> <span class="o">=</span> <span class="p">(</span><span class="n">hx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+			<span class="k">elif</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">S1</span><span class="p">):</span>
+				<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+				<span class="n">gx</span><span class="p">,</span> <span class="n">hx</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">gx</span><span class="p">)</span><span class="o">%</span><span class="n">p</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">hx</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">g</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+				<span class="n">gx</span> <span class="o">=</span> <span class="p">(</span><span class="n">gx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+		
+			<span class="c1">#x[2i]</span>
+			<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">S0</span><span class="p">):</span>
+					<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">h</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+					<span class="n">hy</span> <span class="o">=</span> <span class="p">(</span><span class="n">hy</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+				<span class="k">elif</span><span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">S1</span><span class="p">):</span>
+					<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+					<span class="n">gy</span><span class="p">,</span> <span class="n">hy</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">gy</span><span class="p">)</span><span class="o">%</span><span class="n">p</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">hy</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">g</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+					<span class="n">gy</span> <span class="o">=</span> <span class="p">(</span><span class="n">gy</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+				
+			<span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="o">==</span><span class="n">y</span><span class="p">):</span> <span class="n">loop</span> <span class="o">=</span> <span class="bp">False</span>
+	
+		<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">gy</span> <span class="o">-</span> <span class="n">gx</span> <span class="o">+</span><span class="n">p</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+		<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">hx</span> <span class="o">-</span> <span class="n">hy</span> <span class="o">+</span><span class="n">p</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+	
+	<span class="n">y</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">inversion_modulaire</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho_pollard_dlp :</span><span class="se">\n</span><span class="s2">[&quot;</span><span class="p">,(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">%</span><span class="n">p</span><span class="p">,</span><span class="s2">&quot;]&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
+	<span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">%</span><span class="n">p</span></div>
+
+
+<span class="c1">#retourne x tel que [x]g = h mod n</span>
+<span class="c1">#p : ordre du groupe dont g est le générateur</span>
+<span class="c1">#b : borne maximale pour les puissances de la fonction de marche aléatoire, p semble plus efficace que les petites valeurs</span>
+<span class="c1">#k : nombre de parties</span>
+<span class="c1">#pré-requis : p premier, h dans &lt;g&gt;</span>
+<span class="k">def</span> <span class="nf">rho_pollard_dlp_adv</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="c1">#brute force pour commencer</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="n">g</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Brute Forcing..&quot;</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">min</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">)):</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">g</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="o">==</span><span class="n">h</span><span class="p">):</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho_pollard_dlp_adv :</span><span class="se">\n</span><span class="s2">[&quot;</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;]&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+			
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;computing f..&quot;</span><span class="p">)</span>
+	<span class="n">puissances</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="n">coefficients</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+		<span class="n">ms</span><span class="p">,</span><span class="n">ns</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+		<span class="k">while</span><span class="p">(</span><span class="n">ms</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">ns</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+			<span class="n">ms</span><span class="p">,</span><span class="n">ns</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">b</span><span class="p">),</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+		<span class="n">puissances</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ms</span><span class="p">,</span><span class="n">ns</span><span class="p">))</span>
+		<span class="n">coefficients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="n">ms</span><span class="p">,</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">ns</span><span class="p">,</span><span class="n">n</span><span class="p">))</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+	
+	<span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">y</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;starting new walk..&quot;</span><span class="p">)</span>
+		<span class="n">gx</span><span class="p">,</span> <span class="n">hx</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="p">(</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="n">gx</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">hx</span><span class="p">,</span><span class="n">n</span><span class="p">)</span> <span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+		<span class="n">gy</span><span class="p">,</span> <span class="n">hy</span> <span class="o">=</span> <span class="n">gx</span><span class="p">,</span> <span class="n">hx</span>
+		<span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+	
+		<span class="n">loop</span> <span class="o">=</span> <span class="bp">True</span>
+	
+		<span class="k">while</span><span class="p">(</span><span class="n">loop</span><span class="p">):</span>
+			<span class="c1">#x[i]</span>
+			<span class="n">i</span> <span class="o">=</span> <span class="n">x</span> <span class="o">%</span> <span class="n">k</span>
+			<span class="n">ms</span><span class="p">,</span><span class="n">ns</span> <span class="o">=</span> <span class="n">puissances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+			<span class="n">coef</span> <span class="o">=</span> <span class="n">coefficients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>			
+			<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">coef</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+			<span class="n">gx</span><span class="p">,</span> <span class="n">hx</span> <span class="o">=</span> <span class="p">(</span><span class="n">gx</span><span class="o">+</span><span class="n">ms</span><span class="p">)</span><span class="o">%</span><span class="n">p</span><span class="p">,</span> <span class="p">(</span><span class="n">hx</span><span class="o">+</span><span class="n">ns</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+		
+			<span class="c1">#x[2i]</span>
+			<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+				<span class="n">i</span> <span class="o">=</span> <span class="n">y</span> <span class="o">%</span> <span class="n">k</span>
+				<span class="n">ms</span><span class="p">,</span><span class="n">ns</span> <span class="o">=</span> <span class="n">puissances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>			
+				<span class="n">coef</span> <span class="o">=</span> <span class="n">coefficients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>			
+				<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">coef</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+				<span class="n">gy</span><span class="p">,</span> <span class="n">hy</span> <span class="o">=</span> <span class="p">(</span><span class="n">gy</span><span class="o">+</span><span class="n">ms</span><span class="p">)</span><span class="o">%</span><span class="n">p</span><span class="p">,</span> <span class="p">(</span><span class="n">hy</span><span class="o">+</span><span class="n">ns</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+				
+			<span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="o">==</span><span class="n">y</span><span class="p">):</span> <span class="n">loop</span> <span class="o">=</span> <span class="bp">False</span>
+	
+		<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">gy</span> <span class="o">-</span> <span class="n">gx</span> <span class="o">+</span><span class="n">p</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+		<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">hx</span> <span class="o">-</span> <span class="n">hy</span> <span class="o">+</span><span class="n">p</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+
+	<span class="n">y</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">inversion_modulaire</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho_pollard_dlp_adv :</span><span class="se">\n</span><span class="s2">[&quot;</span><span class="p">,(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">%</span><span class="n">p</span><span class="p">,</span><span class="s2">&quot;]&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
+	<span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+	
+<span class="c1">#sous-routine pour rho pollard parallélisé</span>
+<span class="k">def</span> <span class="nf">sub_rho</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">puissances</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">dico</span><span class="p">):</span>
+	
+	<span class="k">if</span><span class="p">(</span><span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">40</span><span class="p">):</span>
+		<span class="n">critere</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">14</span><span class="p">)</span>
+	<span class="k">elif</span><span class="p">(</span><span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">):</span>
+		<span class="n">critere</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">10</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">critere</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span>
+	
+	<span class="n">points</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="n">y</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">y</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+	
+		<span class="n">gx</span><span class="p">,</span> <span class="n">hx</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="p">(</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="n">gx</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">hx</span><span class="p">,</span><span class="n">n</span><span class="p">)</span> <span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+	
+		<span class="n">loop</span> <span class="o">=</span> <span class="bp">True</span>
+	
+		<span class="k">while</span><span class="p">(</span><span class="n">loop</span><span class="p">):</span>	
+			<span class="n">i</span> <span class="o">=</span> <span class="n">x</span> <span class="o">%</span> <span class="n">k</span>
+			<span class="n">ms</span><span class="p">,</span><span class="n">ns</span> <span class="o">=</span> <span class="n">puissances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+			<span class="n">coef</span> <span class="o">=</span> <span class="n">coefficients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>			
+			<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">coef</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+			<span class="n">gx</span><span class="p">,</span> <span class="n">hx</span> <span class="o">=</span> <span class="p">(</span><span class="n">gx</span><span class="o">+</span><span class="n">ms</span><span class="p">)</span><span class="o">%</span><span class="n">p</span><span class="p">,</span> <span class="p">(</span><span class="n">hx</span><span class="o">+</span><span class="n">ns</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+		
+			<span class="k">if</span><span class="p">(</span><span class="n">x</span> <span class="o">%</span> <span class="n">critere</span> <span class="o">==</span> <span class="n">x</span><span class="p">):</span>
+				<span class="c1">#print(&quot;distinguished point hit&quot;, points)</span>
+				<span class="n">points</span> <span class="o">+=</span> <span class="mi">1</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">x</span> <span class="ow">in</span> <span class="n">dico</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+					<span class="n">loop</span> <span class="o">=</span> <span class="bp">False</span>
+					<span class="n">gy</span><span class="p">,</span><span class="n">hy</span> <span class="o">=</span> <span class="n">dico</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+					<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">gy</span> <span class="o">-</span> <span class="n">gx</span> <span class="o">+</span><span class="n">p</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+					<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">hx</span> <span class="o">-</span> <span class="n">hy</span> <span class="o">+</span><span class="n">p</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">dico</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">gx</span><span class="p">,</span><span class="n">hx</span><span class="p">)</span>
+		
+	<span class="n">y</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">inversion_modulaire</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+	<span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+			
+	
+
+<span class="c1">#retourne x tel que [x]g = h mod n</span>
+<span class="c1">#p : ordre du groupe dont g est le générateur</span>
+<span class="c1">#b : borne maximale pour les puissances de la fonction de marche aléatoire, p semble plus efficace que les petites valeurs</span>
+<span class="c1">#k : nombre de parties</span>
+<span class="c1">#jobs : nombre de sous-routines à lancer dans la parallélisation (à ajuster selon le nombre de coeurs logiques)</span>
+<span class="c1">#pré-requis : p premier, h dans &lt;g&gt;</span>
+<span class="k">def</span> <span class="nf">rho_pollard_dlp_par</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">jobs</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="c1">#brute force pour commencer</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="n">g</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Brute Forcing..&quot;</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">min</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">)):</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">g</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="o">==</span><span class="n">h</span><span class="p">):</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho_pollard_dlp_par :</span><span class="se">\n</span><span class="s2">[&quot;</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;]&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+			
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;computing f..&quot;</span><span class="p">)</span>
+	<span class="n">puissances</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="n">coefficients</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+		<span class="n">ms</span><span class="p">,</span><span class="n">ns</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+		<span class="k">while</span><span class="p">(</span><span class="n">ms</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">ns</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+			<span class="n">ms</span><span class="p">,</span><span class="n">ns</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">b</span><span class="p">),</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+		<span class="n">puissances</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ms</span><span class="p">,</span><span class="n">ns</span><span class="p">))</span>
+		<span class="n">coefficients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="n">ms</span><span class="p">,</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">ns</span><span class="p">,</span><span class="n">n</span><span class="p">))</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+		
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;launching distributed attack&quot;</span><span class="p">)</span>
+	<span class="n">dico</span> <span class="o">=</span> <span class="p">{}</span>
+		
+	<span class="k">def</span> <span class="nf">core</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">puissances</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">dico</span><span class="p">,</span> <span class="n">output_queue</span><span class="p">):</span> <span class="n">output_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">sub_rho</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">puissances</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">dico</span><span class="p">))</span>
+	<span class="n">queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+	<span class="n">procs</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">jobs</span><span class="p">):</span>
+		<span class="n">procs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">core</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">puissances</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">dico</span><span class="p">,</span> <span class="n">queue</span><span class="p">)))</span>
+	<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">procs</span><span class="p">:</span>
+		<span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+	<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">procs</span><span class="p">:</span>
+		<span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho_pollard_dlp_par :</span><span class="se">\n</span><span class="s2">[&quot;</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="s2">&quot;]&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">x</span>
+		
+
+<span class="c1">#Résout un DLP dans Z/nZ*</span>
+<span class="c1">#g un générateur, on cherche x tq [x mod n-1]g = h mod n</span>
+<span class="k">def</span> <span class="nf">pohlig_hellman</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">log_file</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="n">p</span> <span class="o">=</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span><span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">==== POHLIG_HELLMAN ====&quot;</span><span class="p">)</span>
+	<span class="n">facteurs</span> <span class="o">=</span> <span class="n">pyfacto</span><span class="o">.</span><span class="n">easy_facto</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
+	<span class="n">La</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="n">Ln</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="n">pi</span> <span class="ow">in</span> <span class="n">facteurs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span><span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=================</span><span class="se">\n</span><span class="s2">Factor :&quot;</span><span class="p">,</span><span class="n">pi</span><span class="p">,</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=================&quot;</span><span class="p">)</span>
+		<span class="n">ei</span> <span class="o">=</span> <span class="n">facteurs</span><span class="p">[</span><span class="n">pi</span><span class="p">]</span>
+		<span class="n">xi</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">y</span> <span class="o">=</span> <span class="n">h</span>
+		<span class="n">b</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">inversion_modulaire</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+		<span class="n">q</span> <span class="o">=</span> <span class="n">p</span><span class="o">//</span><span class="n">pi</span>
+		<span class="n">gi</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ei</span><span class="p">):</span>
+			<span class="n">w</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+			<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+			<span class="n">xj</span> <span class="o">=</span> <span class="n">rho_pollard_dlp_par</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+			<span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+			<span class="n">log_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">)</span>
+			<span class="n">xi</span> <span class="o">+=</span> <span class="n">xj</span><span class="o">*</span><span class="p">(</span><span class="n">pi</span><span class="o">**</span><span class="n">i</span><span class="p">)</span>
+			<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">xj</span><span class="p">,</span><span class="n">n</span><span class="p">))</span> <span class="o">%</span> <span class="n">n</span>
+			<span class="n">b</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">pi</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+			<span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">//</span><span class="n">pi</span>
+		<span class="n">La</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+		<span class="n">Ln</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pi</span><span class="o">**</span><span class="n">ei</span><span class="p">)</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">crt</span><span class="p">(</span><span class="n">La</span><span class="p">,</span><span class="n">Ln</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pohlig_hellman :</span><span class="se">\n</span><span class="s2">[&quot;</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="s2">&quot;]&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">n</span><span class="p">))</span>
+	<span class="k">return</span> <span class="n">x</span>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Amaury Behague, Raphaël Roblin.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

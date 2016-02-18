@@ -25,6 +25,13 @@ __version__ = "3"
 __email__ = "amaury.behague@gmail.com"
 __status__ = "Beta"
 
+"""
+.. module:: pyfacto
+	:platform: Unix
+	:synopsis: Useful factoring tools.
+	
+.. moduleauthor:: Amaury Behague <amaury.behague@gmail.com>
+"""
 
 import itools, random, time
 from multiprocessing import Process, Queue

@@ -1,0 +1,501 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>itools &mdash; cryptoguru Beta documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'Beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="cryptoguru Beta documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for itools</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (C) 2016 Amaury Behague &lt;amaury.behague@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of cryptoguru.</span>
+<span class="c1">#</span>
+<span class="c1"># cryptopwn is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Amaury Behague&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2016, Amaury Behague&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;GPL&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;3&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;amaury.behague@gmail.com&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Beta&quot;</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: itools</span>
+<span class="sd">	:platform: Unix</span>
+<span class="sd">	:synopsis: Useful integers functions</span>
+<span class="sd">	</span>
+<span class="sd">.. moduleauthor:: Amaury Behague &lt;amaury.behague@gmail.com&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="gcd"><a class="viewcode-back" href="../itools.html#itools.gcd">[docs]</a><span class="k">def</span> <span class="nf">gcd</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Computes the greatest common divisor.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		a (int): some integer</span>
+<span class="sd">		b (int): some integer</span>
+<span class="sd">	</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		(int) The GCD.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">while</span><span class="p">(</span><span class="n">b</span><span class="o">!=</span><span class="mi">0</span><span class="p">):</span>
+		<span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="o">%</span><span class="n">b</span>
+	<span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="euclide_extended"><a class="viewcode-back" href="../itools.html#itools.euclide_extended">[docs]</a><span class="k">def</span> <span class="nf">euclide_extended</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Extended version of Euclide&#39;s algorithm.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		a (int): some integer</span>
+<span class="sd">		b (int): some integer</span>
+<span class="sd">	</span>
+<span class="sd">	Optional args:</span>
+<span class="sd">		verbose (bool): Set to True to get a display</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		(int,int,int) Three integers, the first one is the gcd, the others are Bezout coefs.</span>
+<span class="sd">	</span>
+<span class="sd">	It doesn&#39;t matter if a&lt;b, the algorithm switches a and b if necessary.</span>
+<span class="sd">	However, if a &lt; b, the first coefficient returned will be the one associated to b (gcd,coef_b,coef_a).</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">if</span> <span class="n">a</span> <span class="o">&gt;=</span> <span class="n">b</span><span class="p">:</span>
+		<span class="n">r0</span> <span class="o">=</span> <span class="n">a</span>
+		<span class="n">r1</span> <span class="o">=</span> <span class="n">b</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">r0</span> <span class="o">=</span> <span class="n">b</span>
+		<span class="n">r1</span> <span class="o">=</span> <span class="n">a</span>
+	<span class="n">u0</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="n">v0</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="n">u1</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="n">v1</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+		<span class="k">print</span><span class="p">(</span><span class="s2">&quot;q</span><span class="se">\t</span><span class="s2">r</span><span class="se">\t</span><span class="s2">u</span><span class="se">\t</span><span class="s2">v&quot;</span><span class="p">)</span>
+		<span class="k">print</span><span class="p">(</span><span class="s2">&quot;0</span><span class="se">\t</span><span class="s2">{0}</span><span class="se">\t</span><span class="s2">{1}</span><span class="se">\t</span><span class="s2">{2}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r0</span><span class="p">,</span> <span class="n">u0</span><span class="p">,</span> <span class="n">v0</span><span class="p">))</span>
+	<span class="n">fini</span> <span class="o">=</span> <span class="bp">False</span>
+	<span class="k">while</span> <span class="ow">not</span> <span class="n">fini</span><span class="p">:</span>
+		<span class="n">q</span> <span class="o">=</span> <span class="n">r0</span> <span class="o">//</span> <span class="n">r1</span>
+		<span class="n">temp</span> <span class="o">=</span> <span class="n">r0</span> <span class="o">%</span> <span class="n">r1</span>
+		<span class="n">r0</span> <span class="o">=</span> <span class="n">r1</span>
+		<span class="n">r1</span> <span class="o">=</span> <span class="n">temp</span>
+		<span class="n">temp</span> <span class="o">=</span> <span class="n">u0</span> <span class="o">-</span> <span class="n">q</span> <span class="o">*</span> <span class="n">u1</span>
+		<span class="n">u0</span> <span class="o">=</span> <span class="n">u1</span>
+		<span class="n">u1</span> <span class="o">=</span> <span class="n">temp</span>
+		<span class="n">temp</span> <span class="o">=</span> <span class="n">v0</span> <span class="o">-</span> <span class="n">q</span> <span class="o">*</span> <span class="n">v1</span>
+		<span class="n">v0</span> <span class="o">=</span> <span class="n">v1</span>
+		<span class="n">v1</span> <span class="o">=</span> <span class="n">temp</span>
+		<span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;{0}</span><span class="se">\t</span><span class="s2">{1}</span><span class="se">\t</span><span class="s2">{2}</span><span class="se">\t</span><span class="s2">{3}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r0</span><span class="p">,</span> <span class="n">u0</span><span class="p">,</span> <span class="n">v0</span><span class="p">))</span>
+		<span class="k">if</span> <span class="n">r1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">fini</span> <span class="o">=</span> <span class="bp">True</span>
+			<span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+				<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Algo termine&quot;</span><span class="p">)</span>
+				<span class="k">print</span><span class="p">(</span><span class="s2">&quot;pgcd({0},{1}) = {2} = {3}x{4} + {5}x{6}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">r0</span><span class="p">,</span> <span class="n">u0</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">v0</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
+	<span class="k">return</span> <span class="n">r0</span><span class="p">,</span> <span class="n">u0</span><span class="p">,</span> <span class="n">v0</span></div>
+
+<span class="c1">#print(euclide_extended(255, 45))</span>
+
+
+
+<div class="viewcode-block" id="inversion_modulaire"><a class="viewcode-back" href="../itools.html#itools.inversion_modulaire">[docs]</a><span class="k">def</span> <span class="nf">inversion_modulaire</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Inverts a mod p.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		a (int): some integer</span>
+<span class="sd">		p (int): some integer, greater than a</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		(int) 1/a mod p if gcd(a,p) = 1</span>
+<span class="sd">			  0 if gcd(a,p) &gt; 1</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">pgcd</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">euclide_extended</span><span class="p">(</span><span class="n">a</span><span class="o">%</span><span class="n">p</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">pgcd</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+		<span class="k">print</span><span class="p">(</span><span class="s2">&quot;{0} non inversible modulo {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+		<span class="k">return</span> <span class="mi">0</span>
+	<span class="k">return</span> <span class="p">(</span><span class="n">v</span><span class="o">+</span><span class="n">p</span><span class="p">)</span><span class="o">%</span><span class="n">p</span></div>
+
+<span class="c1">#print inversion_modulaire(5,23)</span>
+
+
+
+<span class="c1">#reconstruit modulo N (produit des ni) x = ai mod ni où les La est la liste des ai et Ln celle des ni.</span>
+<span class="c1">#pré-requis : La et Ln de même taille</span>
+<div class="viewcode-block" id="crt"><a class="viewcode-back" href="../itools.html#itools.crt">[docs]</a><span class="k">def</span> <span class="nf">crt</span><span class="p">(</span><span class="n">La</span><span class="p">,</span> <span class="n">Ln</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Uses the Chinese Remainder Theorem to deduct X = La[i] mod Ln[i] for all i &lt; len(La) = len(Ln)</span>
+<span class="sd">	X is computed modulo N which is the product of the elements of Ln.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		La (List): a list of integers</span>
+<span class="sd">		Ln (List): a list of integers, which size must be len(La).</span>
+<span class="sd">		</span>
+<span class="sd">	Optional args:</span>
+<span class="sd">		N (int): the final modulo. Will be computed if omitted.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		(int) the result of the reconstruction modulo N.</span>
+<span class="sd">		</span>
+<span class="sd">	For all i, the following statement should be true :</span>
+<span class="sd">	La[i] &lt; Ln[i]</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="c1">#if N is omitted</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">N</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+		<span class="n">N</span> <span class="o">=</span> <span class="mi">1</span>
+		<span class="k">for</span> <span class="n">ni</span> <span class="ow">in</span> <span class="n">Ln</span> <span class="p">:</span>
+			<span class="n">N</span> <span class="o">*=</span> <span class="n">ni</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>	
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Ln</span><span class="p">)):</span>
+		<span class="n">p</span> <span class="o">=</span> <span class="n">N</span> <span class="o">//</span> <span class="n">Ln</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+		<span class="n">v</span> <span class="o">=</span> <span class="n">inversion_modulaire</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Ln</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">La</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">p</span><span class="p">)</span> <span class="o">%</span> <span class="n">N</span>
+	<span class="k">return</span> <span class="n">x</span></div>
+	
+<span class="c1">#print(crt([2,3,2],[3,5,7],105))</span>
+
+
+<span class="k">def</span> <span class="nf">ind_euler</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+
+	<span class="n">phi</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+		<span class="n">pgcd</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">euclide_extended</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">pgcd</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">phi</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">return</span> <span class="n">phi</span>
+
+
+<div class="viewcode-block" id="exp_mod"><a class="viewcode-back" href="../itools.html#itools.exp_mod">[docs]</a><span class="k">def</span> <span class="nf">exp_mod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;An efficient function to compute a^n mod p.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		a (int): an integer</span>
+<span class="sd">		n (int): an integer</span>
+<span class="sd">		p (int): an integer &gt; a</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		int. a^n mod p</span>
+<span class="sd">	</span>
+<span class="sd">	Actually just a custom implementation of fastexp. Uses the binary decomposition of n.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+		
+	<span class="n">r1</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+		<span class="n">r</span> <span class="o">=</span> <span class="n">a</span>
+		<span class="n">j</span> <span class="o">=</span> <span class="mi">1</span>
+		<span class="k">while</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">j</span> <span class="o">&lt;=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">i</span><span class="p">:</span>
+			<span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">r</span><span class="p">)</span> <span class="o">%</span> <span class="n">p</span>
+			<span class="n">j</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">j</span>
+		<span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">j</span>
+		<span class="n">r1</span> <span class="o">=</span> <span class="p">(</span><span class="n">r1</span> <span class="o">*</span> <span class="n">r</span><span class="p">)</span> <span class="o">%</span> <span class="n">p</span>
+	<span class="k">return</span> <span class="n">r1</span></div>
+	
+	
+<div class="viewcode-block" id="isqrt"><a class="viewcode-back" href="../itools.html#itools.isqrt">[docs]</a><span class="k">def</span> <span class="nf">isqrt</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Integer Square Root.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		n (int): an integer</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		int. The greatest int s such that s*s &lt;= n.</span>
+<span class="sd">		</span>
+<span class="sd">	Uses Newton&#39;s iterative method.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	
+	<span class="n">x</span> <span class="o">=</span> <span class="n">n</span>
+	<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+	<span class="k">while</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">x</span><span class="p">:</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="n">y</span>
+		<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">n</span> <span class="o">//</span> <span class="n">x</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+	<span class="k">return</span> <span class="n">x</span></div>
+
+<div class="viewcode-block" id="ilog"><a class="viewcode-back" href="../itools.html#itools.ilog">[docs]</a><span class="k">def</span> <span class="nf">ilog</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Integer logarithm in base b.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		x (int): an integer</span>
+<span class="sd">		b (int): a base</span>
+<span class="sd">	</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		int. The greatest integer l such that b**l &lt;= x.</span>
+<span class="sd">		</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">r</span> <span class="o">=</span> <span class="n">x</span>
+	<span class="n">l</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="k">while</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="n">b</span><span class="p">:</span>
+		<span class="n">r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">//</span> <span class="n">b</span>
+		<span class="n">l</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">return</span> <span class="n">l</span></div>
+
+<span class="k">def</span> <span class="nf">temoin_miller</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+	<span class="c1">#n&gt;2, a&gt;1</span>
+	<span class="n">r</span><span class="o">=</span><span class="mi">0</span>
+	<span class="n">s</span><span class="o">=</span><span class="mi">0</span>
+	<span class="n">d</span> <span class="o">=</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">r</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+		<span class="n">r</span> <span class="o">=</span> <span class="n">d</span> <span class="o">%</span> <span class="mi">2</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">r</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+			<span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">//</span><span class="mi">2</span>
+			<span class="n">s</span> <span class="o">+=</span> <span class="mi">1</span>
+
+	<span class="n">x</span> <span class="o">=</span> <span class="n">exp_mod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="o">==</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">x</span><span class="o">==</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">False</span>
+
+	<span class="k">while</span><span class="p">(</span><span class="n">s</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">):</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">%</span> <span class="n">n</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+			<span class="k">return</span> <span class="bp">False</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">-</span><span class="mi">1</span>
+
+	<span class="k">return</span> <span class="bp">True</span>
+	
+	
+<div class="viewcode-block" id="rabin_miller"><a class="viewcode-back" href="../itools.html#itools.rabin_miller">[docs]</a><span class="k">def</span> <span class="nf">rabin_miller</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Rabin-Miller primality test.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		n (int) : the integer which primality you wish to test</span>
+<span class="sd">	</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		k (int) : number of repetitions of the test</span>
+<span class="sd">		verbose (boot) : set to True if you want a display</span>
+<span class="sd">		</span>
+<span class="sd">	If this test returns False, you are 100% sure that n isn&#39;t prime.</span>
+<span class="sd">	However, if this test returns True, there&#39;s a probability of 1/(2**k) that n isn&#39;t prime.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">&lt;</span><span class="mi">4</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">True</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+		<span class="n">a</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">temoin_miller</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">n</span><span class="p">)):</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Rabin-Miller :&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;is not prime&quot;</span><span class="p">)</span>
+			<span class="k">return</span> <span class="bp">False</span>
+			
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rabin_miller :&quot;</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">has&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">k</span><span class="p">)),</span> <span class="s2">&quot;</span><span class="si">% c</span><span class="s2">hances to be prime&quot;</span><span class="p">)</span>
+	<span class="k">return</span> <span class="bp">True</span></div>
+
+<span class="k">def</span> <span class="nf">mersenne</span><span class="p">(</span><span class="n">p</span><span class="p">):</span> <span class="c1">#Mersenne numbers (not all primes)</span>
+	<span class="k">return</span> <span class="mi">2</span><span class="o">**</span><span class="n">p</span> <span class="o">-</span> <span class="mi">1</span>
+	
+<span class="c1">#rabin_miller(mersenne(107),10,True)</span>
+
+
+<div class="viewcode-block" id="get_primes"><a class="viewcode-back" href="../itools.html#itools.get_primes">[docs]</a><span class="k">def</span> <span class="nf">get_primes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Computes the list of primes between two integers.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		a (int): an integer</span>
+<span class="sd">		b (int): an integer such as b &gt; a</span>
+<span class="sd">		k (int): the number of repetitions Rabin-Miller primality test.</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		verbose (bool): set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		(List) the list of pseudo-prime integers in [a,b[</span>
+<span class="sd">	</span>
+<span class="sd">	Why &quot;pseudo-prime&quot;? Because you can never be sure that they are prime with RM primality test.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+		
+	<span class="n">primes</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">a</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">):</span>
+		<span class="n">start</span> <span class="o">=</span> <span class="mi">5</span>
+		<span class="n">primes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">start</span> <span class="o">=</span> <span class="n">a</span>
+	<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+		<span class="c1">#rabin_miller ne fait les k tours que si nécessaire</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">rabin_miller</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">k</span><span class="p">)):</span>
+			<span class="n">primes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;get_primes : those numbers have&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">k</span><span class="p">)),</span> <span class="s2">&quot;</span><span class="si">% c</span><span class="s2">hances to be prime&quot;</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">primes</span></div>
+	
+<span class="c1">#print(get_primes(10000,10100,20,True))</span>
+		
+<span class="c1">#génère un nombre premier entre a et b, testé avec k tours de Rabin-Miller</span>
+<div class="viewcode-block" id="rand_prime"><a class="viewcode-back" href="../itools.html#itools.rand_prime">[docs]</a><span class="k">def</span> <span class="nf">rand_prime</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Generates a random prime number between two integers.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		a (int): an integer</span>
+<span class="sd">		b (int): an integer such as b &gt; a</span>
+<span class="sd">		k (int): the number of repetitions Rabin-Miller primality test.</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		verbose (bool): set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		(int) a random pseudo-prime between a and b.</span>
+<span class="sd">		</span>
+<span class="sd">	Why &quot;pseudo-prime&quot;? Because you can never be sure that they are prime with RM primality test.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+	<span class="k">while</span><span class="p">(</span><span class="ow">not</span> <span class="n">rabin_miller</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">k</span><span class="p">)):</span>
+		<span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rand_prime :&quot;</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">has&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">k</span><span class="p">)),</span> <span class="s2">&quot;</span><span class="si">% c</span><span class="s2">hances to be prime&quot;</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">r</span></div>
+	
+
+<span class="c1">#retourne 0 si aucun generateur n&#39;est trouve : p n&#39;est pas premier</span>
+<span class="k">def</span> <span class="nf">trouver_generateur</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+	<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+		<span class="n">r</span> <span class="o">=</span> <span class="n">a</span>
+		<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+		<span class="k">while</span> <span class="n">r</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">%</span> <span class="n">p</span>
+		<span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">a</span>
+	<span class="k">return</span> <span class="mi">0</span>
+	
+<span class="c1">#print trouver_generateur(13)</span>
+	
+<span class="c1">#trouve un générateur du groupe cyclique Z/pZ* par random</span>
+<span class="k">def</span> <span class="nf">rand_gen</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+ 	<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+ 	<span class="k">while</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+ 		<span class="n">a</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+ 		<span class="n">r</span> <span class="o">=</span> <span class="n">a</span>
+ 		<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+ 		<span class="k">while</span><span class="p">(</span><span class="n">r</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+ 			<span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+ 			<span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="o">*</span><span class="n">a</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+ 	<span class="k">return</span> <span class="n">a</span>
+ 	
+<div class="viewcode-block" id="get_group"><a class="viewcode-back" href="../itools.html#itools.get_group">[docs]</a><span class="k">def</span> <span class="nf">get_group</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Generates a &quot;safe&quot; group for the DLP</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		n (int): a prime integer : security modulo / prime seed</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		verbose (bool): set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		(int,int) g,p with p a prime integer such that p = k*n with some small integer k. And g is a generator of Z/pZ*</span>
+<span class="sd">		</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">====== Group generator ======&quot;</span><span class="p">)</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;prime seed :&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+	<span class="n">k</span> <span class="o">=</span> <span class="mi">2</span>
+	<span class="n">p</span> <span class="o">=</span> <span class="n">k</span><span class="o">*</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">rabin_miller</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span><span class="o">==</span><span class="bp">False</span><span class="p">):</span>
+		<span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+		<span class="n">p</span> <span class="o">=</span> <span class="n">k</span><span class="o">*</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span>
+	<span class="n">g</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;+ 1&quot;</span><span class="p">)</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+		<span class="n">h</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">g</span> <span class="o">=</span> <span class="n">exp_mod</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">g</span><span class="p">,</span><span class="n">p</span></div>
+	
+<span class="c1">#n = rand_prime(1000000,2000000,10)</span>
+<span class="c1">#g1 = rand_gen(n)</span>
+<span class="c1">#g2 = trouver_generateur(n)</span>
+<span class="c1">#print(&quot;generateurs pour N =&quot;,n,&quot;:&quot;,g1,g2)</span>
+	
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Amaury Behague, Raphaël Roblin.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

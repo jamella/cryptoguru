@@ -25,6 +25,14 @@ __version__ = "3"
 __email__ = "amaury.behague@gmail.com"
 __status__ = "Beta"
 
+"""
+.. module:: pwndlp
+	:platform: Unix
+	:synopsis: Efficient Attacks on the DLP.
+	
+.. moduleauthor:: Amaury Behague <amaury.behague@gmail.com>
+"""
+
 
 import itools, random, pyfacto, time
 from multiprocessing import Process, Queue
@@ -35,6 +43,7 @@ random.seed()
 #p : ordre du groupe dont g est le générateur
 #pré-requis : p premier, h dans <g>
 def rho_pollard_dlp(g, h, p, n, verbose=False):
+	"""Pollard's Rho applied to DLP."""
 	
 	#brute force pour commencer
 	if(verbose): print("Brute forcing..")
@@ -269,25 +278,5 @@ def pohlig_hellman(g, h, n, log_file, verbose=False):
 	x = itools.crt(La,Ln,p)
 	if(verbose): print("pohlig_hellman :\n[",x,"]",g,"=",itools.exp_mod(g,x,n))
 	return x
-
-log_file = open("../results/rho_dlp_log.txt", "w+")
-
-for l in range(30,70,5):
-	print("\n\n ==============\n Taille",l,"bits\n ==============\n")
-	log_file.write("\n\n====== Taille de l'entrée : " + str(l) + " bits =======\n")
-	p = itools.rand_prime(2**(l-1),2**l,10)
-	g,n = itools.get_group(p, True)
-	print("N =",n,"générateur trouvé :",g)
-	x = random.randint(2,n-1)
-	h = itools.exp_mod(g,x,n)
-	print("N =",n,", g =",g,", x =",x,", h =",h)
-	if(l<60):
-		for _ in range(20):
-			x2 = pohlig_hellman(g,h,n,log_file,True)
-	else:
-		for _ in range(10):
-			x2 = pohlig_hellman(g,h,n,log_file,True)
-
-log_file.close()
 
 
