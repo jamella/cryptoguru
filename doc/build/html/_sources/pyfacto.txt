@@ -1,5 +1,5 @@
-**pyfacto** : *factor small to large integers*
-**********************************************
+**pyfacto** : *useful factoring tools*
+**************************************
 
 .. include:: nav.rst
 

@@ -38,36 +38,62 @@ from multiprocessing import Process, Queue
 
 random.seed()
 
-#Retourne un facteur de n
-#pré-requis : n impair
+
 def facto_fermat(n, verbose=False):
-    if(n%2 == 0):
-        print("Erreur factoFermat : n pair")
-        return 0
-    aux = itools.isqrt(n)
-    if aux*aux == n:
-        if(verbose): print("n est un carré")
-    aux += 1
-    res = aux*aux - n
-    if(verbose): print(res)
-    r = itools.isqrt(res)
-    e = r*r - res
-    while(e != 0):
-        aux += 1
-        res = aux*aux - n
-        r = itools.isqrt(res)
-        e = r*r - res
-    res = aux + itools.isqrt(res)
-    if(vernose): print("factoFermat :\n",n,"=",res,"*",n//res)
-    return res
+	"""Fermat's factoring algorithm.
+	
+	Args:
+		- *n (int)*: an odd integer
+		
+	Optional Args:
+		- *verbose (bool)*: set to True if you want a display.
+	
+	Returns:
+		- *(int)*: a subfactor of n.
+		
+	Not very efficient.
+	"""
+
+	if(n%2 == 0):
+		print("facto_fermat error: n even")
+		return 0
+	aux = itools.isqrt(n)
+	if aux*aux == n:
+		if(verbose): print("n is a square")
+	aux += 1
+	res = aux*aux - n
+	if(verbose): print(res)
+	r = itools.isqrt(res)
+	e = r*r - res
+	while(e != 0):
+		aux += 1
+		res = aux*aux - n
+		r = itools.isqrt(res)
+		e = r*r - res
+	res = aux + itools.isqrt(res)
+	if(vernose): print("facto_fermat :\n",n,"=",res,"*",n//res)
+	return res
 
 #n = itools.mersenne(17) * itools.mersenne(19)
 #itools.rabin_miller(n,10)
 #print(facto_fermat(n,True))
 
-#retourne un petit facteur de n
-#pré-requis : n composé
+#TODO: implement improved & parallelized versions of Pollard's Rho applied to factoring.
 def rho_pollard(n,verbose=False):
+	"""Pollard's Rho algorithm applied to factoring.
+	
+	Args:
+		- *n (int)*: a non-prime integer
+		
+	Optional Args:
+		- *verbose (bool)*: set to True if you want a display.
+		
+	Returns:
+		- *(int)*: a small factor of n
+		
+	Simple and efficient.
+	"""
+		
 	x = random.randint(1,n)
 	y = x
 	g = 1
@@ -83,8 +109,21 @@ def rho_pollard(n,verbose=False):
 #rho_pollard(n,True)
 
 
-#Version améliorée par Brent : http://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf
 def rho_pollard_brent(n,verbose=False):
+	"""Brent's improved version of Pollard's Rho algorithm applied to factoring.
+	*(source : http://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf)*
+	
+	Args:
+		- *n (int)*: a non-prime integer
+		
+	Optional Args:
+		- *verbose (bool)*: set to True if you want a display.
+		
+	Returns:
+		- *(int)*: a small factor of n
+		
+	Clearly more efficient than the standard Pollard's Rho algorithm.
+	"""
 	x = random.randint(1,n)
 	c = random.randint(1,n)
 	m = random.randint(1,n)
@@ -119,10 +158,26 @@ def rho_pollard_brent(n,verbose=False):
 #n = itools.rand_prime(2**48,2**49,20)*itools.rand_prime(2**48,2**49,20)
 #rho_pollard_brent(n,True)
 
-#version parallélisée
-#d'intérêt limité, permet juste d'éviter de souffrir d'un mauvais tirage
-#augmente quand même les chances de vite tomber sur une relation puisque l'on a plusieurs points de départ (racine du nombre de procs)
+
+#TODO: implement a version using distinguished points and a hash table.
 def rho_pollard_brent_p(n,jobs=8,verbose=False):
+	"""Brent's improved & parallelized version of Pollard's Rho algorithm applied to factoring.
+	*(source : http://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf)*
+	
+	Args:
+		- *n (int)*: a non-prime integer
+		
+	Optional Args:
+		- *jobs (int)*: number of threads to launch. Should be your number of virtual cores.
+		- *verbose (bool)*: set to True if you want a display.
+		
+	Returns:
+		- *(int)*: a small factor of n
+		
+	Limited efficiency due to no communication between the processes :
+		Acceleration ~ sqrt(jobs)
+	"""
+
 	def core(n, output_queue): output_queue.put(rho_pollard_brent(n,False))
 	queue = Queue()
 	procs = []
@@ -138,11 +193,26 @@ def rho_pollard_brent_p(n,jobs=8,verbose=False):
 	
 #rho_pollard_brent_p(n,8,True)
 
-#retourne un facteur de n
-#pré-requis : n possède un facteur p tel que p-1 soit B-lisse
-#nbRM : nombre de tours de Rabin-Miller pour générer la liste des premiers
+
 #B = 1000000 permet de trouver 1/4 des facteurs de 10 chiffres, et 1/27 de ceux de 18 chiffres
 def pm1_pollard(n,B,nbRM=20,verbose=False):
+	"""Pollard's p-1 factoring algorithm.
+	
+	Args:
+		- *n (int)*: an integer
+		- *B (int)*: smooth boundary
+	
+	Optional Args:
+		- *nbRM (int)*: number of repeats of Rabin-Miller primality test.
+		- *verbose (bool)*: set to True if you want a display.
+		
+	Returns:
+		- *(int)*: a subfactor p of n such that p-1 is B-smooth if it exists.
+					0 if attack failed.
+	
+	"""
+	
+	
 	lB = itools.ilog(B,2)
 	primes = itools.get_primes(1,B,nbRM)
 	a = random.randint(1,n)
@@ -163,7 +233,21 @@ def pm1_pollard(n,B,nbRM=20,verbose=False):
 #pm1_pollard(n,10000,10,True)
 
 def pm1_pollard_auto(n,Bmax,verbose=False):
-	#paramètres ajustés pour une complexité raisonnable
+	"""Pollard's p-1 factoring algorithm with automatic Boundary adjustment.
+	
+	Args:
+		- *n (int)*: an integer
+		- *Bmax (int)*: Maximum smooth boundary
+	
+	Optional Args:
+		- *verbose (bool)*: set to True if you want a display.
+		
+	Returns:
+		- *(int)*: a subfactor p of n such that p-1 is B-smooth if it exists.
+					0 if attack failed.
+	
+	"""
+	#optimized parameters
 	B = 16000
 	nbRM = 10
 	alternate = False
@@ -205,13 +289,28 @@ def pm1_pollard_auto(n,Bmax,verbose=False):
 	
 #pm1_pollard_auto(n,256000,True)
 
-#calcule V[mq] % n quand v = V[m]
-#V est la suite de Lucas définie par V[i] = A*V[i-1] - V[i-2]
-#on utilise les formules suivantes :
-#V[2n] = V[n]*V[n] - 2
-#V[m+n] = V[m]*V[n] - V[m-n]
-#on calcule à la fois V[qm] et V[(q+1)m] (pour résoudre la dépendance de l'addition)
+
 def lucas_mul(v,q,n):
+	"""Computes an index multiplication in a Lucas sequence.
+		
+	Args:
+		- *v (int)*: V[m]
+		- *q (int)*: the multiplicator of the index
+		- *n (int)*: the modulo
+	
+	Returns:
+		- *(int)*: V[mq] mod n
+		
+	V is defined by : 
+		V[i] = A*V[i-1] - V[i-2] with some A.
+		
+	This function uses the following fomulas :
+		V[2n] = V[n]*V[n] - 2
+		V[m+n] = V[m]*V[n] - V[m-n]
+		
+	V[qm] and V[(q+1)m] are computed at the same time to solve the index addition dependency.
+	"""
+		
 	x = v
 	y = (v*v - 2) % n
 	for bit in bin(q)[3:]:
@@ -223,10 +322,24 @@ def lucas_mul(v,q,n):
 			x=(x*x-2) % n
 	return x
 
-#retourne un facteur de n
-#pré-requis : n possède un facteur p tel que p+1 soit B-lisse
-#nbRM : nombre de tours de Rabin-Miller pour générer la liste des premiers
+
 def pp1_williams(n,B,nbRM=20,verbose=False):
+	"""Williams' p+1 factoring algorithm.
+	
+	Args:
+		- *n (int)*: an integer
+		- *B (int)*: smooth boundary
+	
+	Optional Args:
+		- *nbRM (int)*: number of repeats of Rabin-Miller primality test.
+		- *verbose (bool)*: set to True if you want a display.
+		
+	Returns:
+		- *(int)*: a subfactor p of n such that p+1 is B-smooth if it exists.
+					0 if attack failed.
+	
+	"""
+
 	lB = itools.ilog(B,2)
 	primes = itools.get_primes(3,B,nbRM)
 	a = random.randint(1,n)
@@ -247,7 +360,23 @@ def pp1_williams(n,B,nbRM=20,verbose=False):
 		if(verbose): print("pp1_williams failed with", B, ":(")
 		return 0
 		
+
 def pp1_williams_auto(n,Bmax,verbose=False):
+	"""Williams' p+1 factoring algorithm with automatic Boundary adjustment.
+	
+	Args:
+		- *n (int)*: an integer
+		- *Bmax (int)*: Maximum smooth boundary
+	
+	Optional Args:
+		- *verbose (bool)*: set to True if you want a display.
+		
+	Returns:
+		- *(int)*: a subfactor p of n such that p+1 is B-smooth if it exists.
+					0 if attack failed.
+	
+	"""
+
 	B = 1000
 	nbRM = 10
 	alternate = False

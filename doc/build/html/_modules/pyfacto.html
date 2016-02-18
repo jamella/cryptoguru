@@ -1,0 +1,616 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyfacto &mdash; cryptoguru Beta documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'Beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="cryptoguru Beta documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pyfacto</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (C) 2016 Amaury Behague &lt;amaury.behague@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of cryptoguru.</span>
+<span class="c1">#</span>
+<span class="c1"># cryptopwn is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Amaury Behague&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2016, Amaury Behague&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;GPL&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;3&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;amaury.behague@gmail.com&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Beta&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: pyfacto</span>
+<span class="sd">	:platform: Unix</span>
+<span class="sd">	:synopsis: Useful factoring tools.</span>
+<span class="sd">	</span>
+<span class="sd">.. moduleauthor:: Amaury Behague &lt;amaury.behague@gmail.com&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">itools</span><span class="o">,</span> <span class="nn">random</span><span class="o">,</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Queue</span>
+
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="facto_fermat"><a class="viewcode-back" href="../pyfacto.html#pyfacto.facto_fermat">[docs]</a><span class="k">def</span> <span class="nf">facto_fermat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Fermat&#39;s factoring algorithm.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: an odd integer</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
+<span class="sd">	</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: a subfactor of n.</span>
+<span class="sd">		</span>
+<span class="sd">	Not very efficient.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+		<span class="k">print</span><span class="p">(</span><span class="s2">&quot;facto_fermat error: n even&quot;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="mi">0</span>
+	<span class="n">aux</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">isqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">aux</span><span class="o">*</span><span class="n">aux</span> <span class="o">==</span> <span class="n">n</span><span class="p">:</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;n is a square&quot;</span><span class="p">)</span>
+	<span class="n">aux</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="n">res</span> <span class="o">=</span> <span class="n">aux</span><span class="o">*</span><span class="n">aux</span> <span class="o">-</span> <span class="n">n</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+	<span class="n">r</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">isqrt</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+	<span class="n">e</span> <span class="o">=</span> <span class="n">r</span><span class="o">*</span><span class="n">r</span> <span class="o">-</span> <span class="n">res</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">e</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+		<span class="n">aux</span> <span class="o">+=</span> <span class="mi">1</span>
+		<span class="n">res</span> <span class="o">=</span> <span class="n">aux</span><span class="o">*</span><span class="n">aux</span> <span class="o">-</span> <span class="n">n</span>
+		<span class="n">r</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">isqrt</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+		<span class="n">e</span> <span class="o">=</span> <span class="n">r</span><span class="o">*</span><span class="n">r</span> <span class="o">-</span> <span class="n">res</span>
+	<span class="n">res</span> <span class="o">=</span> <span class="n">aux</span> <span class="o">+</span> <span class="n">itools</span><span class="o">.</span><span class="n">isqrt</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">vernose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;facto_fermat :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">res</span><span class="p">,</span><span class="s2">&quot;*&quot;</span><span class="p">,</span><span class="n">n</span><span class="o">//</span><span class="n">res</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">res</span></div>
+
+<span class="c1">#n = itools.mersenne(17) * itools.mersenne(19)</span>
+<span class="c1">#itools.rabin_miller(n,10)</span>
+<span class="c1">#print(facto_fermat(n,True))</span>
+
+<span class="c1">#TODO: implement improved &amp; parallelized versions of Pollard&#39;s Rho applied to factoring.</span>
+<div class="viewcode-block" id="rho_pollard"><a class="viewcode-back" href="../pyfacto.html#pyfacto.rho_pollard">[docs]</a><span class="k">def</span> <span class="nf">rho_pollard</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Pollard&#39;s Rho algorithm applied to factoring.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: a non-prime integer</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: a small factor of n</span>
+<span class="sd">		</span>
+<span class="sd">	Simple and efficient.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+		
+	<span class="n">x</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+	<span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+	<span class="n">g</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+		<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+		<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+		<span class="n">g</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="p">)</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho_pollard :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">n</span><span class="o">//</span><span class="n">g</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">g</span></div>
+	
+<span class="c1">#n = itools.rand_prime(2**35,2**36,20)*itools.rand_prime(2**35,2**36,20)</span>
+<span class="c1">#rho_pollard(n,True)</span>
+
+
+<div class="viewcode-block" id="rho_pollard_brent"><a class="viewcode-back" href="../pyfacto.html#pyfacto.rho_pollard_brent">[docs]</a><span class="k">def</span> <span class="nf">rho_pollard_brent</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Brent&#39;s improved version of Pollard&#39;s Rho algorithm applied to factoring.</span>
+<span class="sd">	*(source : http://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf)*</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: a non-prime integer</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: a small factor of n</span>
+<span class="sd">		</span>
+<span class="sd">	Clearly more efficient than the standard Pollard&#39;s Rho algorithm.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+	<span class="n">c</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+	<span class="n">m</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+	<span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+	<span class="n">g</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="n">r</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="n">q</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="n">y</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">r</span><span class="p">):</span>
+			<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+		<span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="k">while</span><span class="p">(</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">r</span> <span class="ow">and</span> <span class="n">g</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+			<span class="n">ys</span> <span class="o">=</span> <span class="n">y</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">r</span><span class="o">-</span><span class="n">k</span><span class="p">)):</span>
+				<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+				<span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+			<span class="n">g</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="n">q</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+			<span class="n">k</span> <span class="o">+=</span> <span class="n">m</span>
+			
+		<span class="n">r</span> <span class="o">*=</span> <span class="mi">2</span>
+	
+	<span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="n">n</span><span class="p">):</span>
+		<span class="n">g</span> <span class="o">=</span> <span class="mi">1</span>
+		<span class="k">while</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+			<span class="n">ys</span> <span class="o">=</span> <span class="p">(</span><span class="n">ys</span><span class="o">*</span><span class="n">ys</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+			<span class="n">g</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">ys</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+	
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho_pollard_brent :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">n</span><span class="o">//</span><span class="n">g</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">g</span></div>
+
+<span class="c1">#n = itools.rand_prime(2**48,2**49,20)*itools.rand_prime(2**48,2**49,20)</span>
+<span class="c1">#rho_pollard_brent(n,True)</span>
+
+
+<span class="c1">#TODO: implement a version using distinguished points and a hash table.</span>
+<div class="viewcode-block" id="rho_pollard_brent_p"><a class="viewcode-back" href="../pyfacto.html#pyfacto.rho_pollard_brent_p">[docs]</a><span class="k">def</span> <span class="nf">rho_pollard_brent_p</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">jobs</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Brent&#39;s improved &amp; parallelized version of Pollard&#39;s Rho algorithm applied to factoring.</span>
+<span class="sd">	*(source : http://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf)*</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: a non-prime integer</span>
+<span class="sd">		</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *jobs (int)*: number of threads to launch. Should be your number of virtual cores.</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: a small factor of n</span>
+<span class="sd">		</span>
+<span class="sd">	Limited efficiency due to no communication between the processes :</span>
+<span class="sd">		Acceleration ~ sqrt(jobs)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">core</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">output_queue</span><span class="p">):</span> <span class="n">output_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">rho_pollard_brent</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="bp">False</span><span class="p">))</span>
+	<span class="n">queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+	<span class="n">procs</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">jobs</span><span class="p">):</span>
+		<span class="n">procs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">core</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">queue</span><span class="p">)))</span>
+	<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">procs</span><span class="p">:</span>
+		<span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+	<span class="n">g</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+	<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">procs</span><span class="p">:</span>
+		<span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho_pollard_brent_p :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">n</span><span class="o">//</span><span class="n">g</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">g</span></div>
+	
+<span class="c1">#rho_pollard_brent_p(n,8,True)</span>
+
+
+<span class="c1">#B = 1000000 permet de trouver 1/4 des facteurs de 10 chiffres, et 1/27 de ceux de 18 chiffres</span>
+<div class="viewcode-block" id="pm1_pollard"><a class="viewcode-back" href="../pyfacto.html#pyfacto.pm1_pollard">[docs]</a><span class="k">def</span> <span class="nf">pm1_pollard</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">nbRM</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Pollard&#39;s p-1 factoring algorithm.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: an integer</span>
+<span class="sd">		- *B (int)*: smooth boundary</span>
+<span class="sd">	</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *nbRM (int)*: number of repeats of Rabin-Miller primality test.</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: a subfactor p of n such that p-1 is B-smooth if it exists.</span>
+<span class="sd">					0 if attack failed.</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	
+	<span class="n">lB</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+	<span class="n">primes</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">get_primes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">nbRM</span><span class="p">)</span>
+	<span class="n">a</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">primes</span><span class="p">:</span>
+		<span class="n">e</span> <span class="o">=</span> <span class="n">lB</span><span class="o">//</span><span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">q</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+		<span class="n">a</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">q</span><span class="o">**</span><span class="n">e</span><span class="p">,</span><span class="n">n</span><span class="p">)</span> <span class="c1">#q**e ~ B</span>
+	<span class="n">g</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+	
+	<span class="k">if</span> <span class="n">g</span><span class="o">&gt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">g</span><span class="o">&lt;</span><span class="n">n</span><span class="p">:</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pm1_pollard :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">n</span><span class="o">//</span><span class="n">g</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">g</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pm1_pollard failed with&quot;</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="s2">&quot;:(&quot;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="mi">0</span></div>
+		
+
+<span class="c1">#n = itools.rand_prime(2**45,2**46,20)*itools.rand_prime(2**45,2**46,20)</span>
+<span class="c1">#pm1_pollard(n,10000,10,True)</span>
+
+<div class="viewcode-block" id="pm1_pollard_auto"><a class="viewcode-back" href="../pyfacto.html#pyfacto.pm1_pollard_auto">[docs]</a><span class="k">def</span> <span class="nf">pm1_pollard_auto</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">Bmax</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Pollard&#39;s p-1 factoring algorithm with automatic Boundary adjustment.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: an integer</span>
+<span class="sd">		- *Bmax (int)*: Maximum smooth boundary</span>
+<span class="sd">	</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: a subfactor p of n such that p-1 is B-smooth if it exists.</span>
+<span class="sd">					0 if attack failed.</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1">#optimized parameters</span>
+	<span class="n">B</span> <span class="o">=</span> <span class="mi">16000</span>
+	<span class="n">nbRM</span> <span class="o">=</span> <span class="mi">10</span>
+	<span class="n">alternate</span> <span class="o">=</span> <span class="bp">False</span>
+	<span class="n">g</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">B</span><span class="o">&lt;=</span><span class="n">Bmax</span><span class="p">):</span>
+		<span class="n">lB</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+		<span class="n">primes</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">get_primes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">nbRM</span><span class="p">)</span>
+		<span class="n">g</span> <span class="o">=</span> <span class="n">n</span>
+		<span class="k">while</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="n">n</span><span class="p">):</span>
+			<span class="n">a</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">primes</span><span class="p">:</span>
+				<span class="n">e</span> <span class="o">=</span> <span class="n">lB</span><span class="o">//</span><span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">q</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+				<span class="n">a</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">q</span><span class="o">**</span><span class="n">e</span><span class="p">,</span><span class="n">n</span><span class="p">)</span> <span class="c1">#q**e ~ B</span>
+			<span class="n">g</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="n">n</span> <span class="ow">and</span> <span class="n">verbose</span><span class="p">):</span>
+				<span class="k">print</span><span class="p">(</span><span class="s2">&quot;N reached, resuming...&quot;</span><span class="p">)</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+			<span class="n">c</span> <span class="o">=</span> <span class="n">a</span>
+			<span class="n">primes</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">get_primes</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">B</span><span class="p">,</span><span class="n">nbRM</span><span class="p">)</span>
+			<span class="n">d</span> <span class="o">=</span> <span class="n">primes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">a</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">primes</span><span class="p">)):</span>
+				<span class="n">g</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="o">!=</span><span class="mi">1</span><span class="p">):</span> 
+					<span class="n">alternate</span><span class="o">=</span><span class="bp">True</span>
+					<span class="k">break</span>
+				<span class="n">d</span> <span class="o">=</span> <span class="n">primes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">primes</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+				<span class="n">a</span> <span class="o">*=</span> <span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">n</span><span class="p">)</span> <span class="c1">#peut être amélioré en mémorisant les c**(2k) dans une table</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+				<span class="n">B</span> <span class="o">*=</span> <span class="mi">4</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="o">!=</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">g</span><span class="o">!=</span><span class="n">n</span><span class="p">):</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> 
+			<span class="k">if</span><span class="p">(</span><span class="n">alternate</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pm1_pollard_auto ( B&#39; =&quot;</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">B</span><span class="p">,</span><span class="s2">&quot;) :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">n</span><span class="o">//</span><span class="n">g</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pm1_pollard_auto ( B =&quot;</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="s2">&quot;) :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">n</span><span class="o">//</span><span class="n">g</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">g</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pm1_pollard_auto failed with&quot;</span><span class="p">,</span> <span class="n">Bmax</span><span class="p">,</span> <span class="s2">&quot;:(&quot;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="mi">0</span></div>
+	
+<span class="c1">#pm1_pollard_auto(n,256000,True)</span>
+
+
+<div class="viewcode-block" id="lucas_mul"><a class="viewcode-back" href="../pyfacto.html#pyfacto.lucas_mul">[docs]</a><span class="k">def</span> <span class="nf">lucas_mul</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Computes an index multiplication in a Lucas sequence.</span>
+<span class="sd">		</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *v (int)*: V[m]</span>
+<span class="sd">		- *q (int)*: the multiplicator of the index</span>
+<span class="sd">		- *n (int)*: the modulo</span>
+<span class="sd">	</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: V[mq] mod n</span>
+<span class="sd">		</span>
+<span class="sd">	V is defined by : </span>
+<span class="sd">		V[i] = A*V[i-1] - V[i-2] with some A.</span>
+<span class="sd">		</span>
+<span class="sd">	This function uses the following fomulas :</span>
+<span class="sd">		V[2n] = V[n]*V[n] - 2</span>
+<span class="sd">		V[m+n] = V[m]*V[n] - V[m-n]</span>
+<span class="sd">		</span>
+<span class="sd">	V[qm] and V[(q+1)m] are computed at the same time to solve the index addition dependency.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+		
+	<span class="n">x</span> <span class="o">=</span> <span class="n">v</span>
+	<span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span><span class="o">*</span><span class="n">v</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+	<span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">bin</span><span class="p">(</span><span class="n">q</span><span class="p">)[</span><span class="mi">3</span><span class="p">:]:</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">bit</span><span class="o">==</span><span class="s1">&#39;1&#39;</span><span class="p">):</span>
+			<span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">-</span><span class="n">v</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+			<span class="n">y</span><span class="o">=</span><span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">y</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">y</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="o">-</span><span class="n">v</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+			<span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+	<span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="pp1_williams"><a class="viewcode-back" href="../pyfacto.html#pyfacto.pp1_williams">[docs]</a><span class="k">def</span> <span class="nf">pp1_williams</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">nbRM</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Williams&#39; p+1 factoring algorithm.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: an integer</span>
+<span class="sd">		- *B (int)*: smooth boundary</span>
+<span class="sd">	</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *nbRM (int)*: number of repeats of Rabin-Miller primality test.</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: a subfactor p of n such that p+1 is B-smooth if it exists.</span>
+<span class="sd">					0 if attack failed.</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">lB</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+	<span class="n">primes</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">get_primes</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">nbRM</span><span class="p">)</span>
+	<span class="n">a</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+	<span class="n">v</span> <span class="o">=</span> <span class="n">a</span>
+	<span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+	<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">primes</span><span class="p">:</span>
+		<span class="n">e</span> <span class="o">=</span> <span class="n">lB</span><span class="o">//</span><span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">q</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+		<span class="c1">#plus efficace que :  for i in range(e): v = lucal_mul(v,q,n)</span>
+		<span class="c1">#évite de calculer e fois la décomposition binaire de q et d&#39;appeler e fonctions, au prix d&#39;une exponentiation entière</span>
+		<span class="n">v</span> <span class="o">=</span> <span class="n">lucas_mul</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">q</span><span class="o">**</span><span class="n">e</span><span class="p">,</span><span class="n">n</span><span class="p">)</span> <span class="c1">#q**e ~ B</span>
+		<span class="n">g</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="o">!=</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">g</span><span class="o">!=</span><span class="n">n</span><span class="p">):</span> <span class="k">break</span>
+				
+	<span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="o">&gt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">g</span><span class="o">&lt;</span><span class="n">n</span><span class="p">):</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pp1_williams :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">n</span><span class="o">//</span><span class="n">g</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">g</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pp1_williams failed with&quot;</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="s2">&quot;:(&quot;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="mi">0</span></div>
+		
+
+<div class="viewcode-block" id="pp1_williams_auto"><a class="viewcode-back" href="../pyfacto.html#pyfacto.pp1_williams_auto">[docs]</a><span class="k">def</span> <span class="nf">pp1_williams_auto</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">Bmax</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Williams&#39; p+1 factoring algorithm with automatic Boundary adjustment.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *n (int)*: an integer</span>
+<span class="sd">		- *Bmax (int)*: Maximum smooth boundary</span>
+<span class="sd">	</span>
+<span class="sd">	Optional Args:</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: a subfactor p of n such that p+1 is B-smooth if it exists.</span>
+<span class="sd">					0 if attack failed.</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">B</span> <span class="o">=</span> <span class="mi">1000</span>
+	<span class="n">nbRM</span> <span class="o">=</span> <span class="mi">10</span>
+	<span class="n">alternate</span> <span class="o">=</span> <span class="bp">False</span>
+	<span class="n">g</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">B</span><span class="o">&lt;=</span><span class="n">Bmax</span><span class="p">):</span>
+		<span class="n">lB</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+		<span class="n">B2</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span><span class="o">//</span><span class="mi">5</span><span class="p">))</span><span class="o">*</span><span class="n">B</span> <span class="c1">#tiré de resultats expérimentaux : http://www.loria.fr/~zimmerma/records/Pplus1.html</span>
+		<span class="n">primes</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">get_primes</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">nbRM</span><span class="p">)</span>
+		<span class="n">g</span> <span class="o">=</span> <span class="n">n</span>
+		
+		<span class="c1">#Step 1</span>
+		<span class="k">while</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="n">n</span><span class="p">):</span>
+			<span class="n">a</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+			<span class="n">v</span> <span class="o">=</span> <span class="n">a</span>
+			<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">primes</span><span class="p">:</span>
+				<span class="n">e</span> <span class="o">=</span> <span class="n">lB</span><span class="o">//</span><span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">q</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+				<span class="c1">#plus efficace que :  for i in range(e): v = lucal_mul(v,q,n)</span>
+				<span class="c1">#évite de calculer e fois la décomposition binaire de q et d&#39;appeler e fonctions, au prix d&#39;une exponentiation entière</span>
+				<span class="n">v</span> <span class="o">=</span> <span class="n">lucas_mul</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">q</span><span class="o">**</span><span class="n">e</span><span class="p">,</span><span class="n">n</span><span class="p">)</span> <span class="c1">#q**e ~ B</span>
+			<span class="c1">#les valeurs atteintes par g sont croissantes et stagent à n lorsqu&#39;atteints</span>
+			<span class="c1">#=&gt; pas besoin de les évaluer à chaque multiplication de l&#39;indice</span>
+			<span class="c1">#si g == n -&gt; on a dépassé les facteurs, il faut recommencer avec la même borne (voire plus petite ?)</span>
+			<span class="c1">#le tirage de a sera déterminant</span>
+			<span class="c1">#si g==1 la borne n&#39;est pas suffisante, on passe au Step 2 puis on augmente</span>
+			<span class="n">g</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="n">n</span> <span class="ow">and</span> <span class="n">verbose</span><span class="p">):</span>
+				<span class="k">print</span><span class="p">(</span><span class="s2">&quot;N reached, resuming...&quot;</span><span class="p">)</span>
+		
+		<span class="c1">#Step 2 TODO : optimal? L&#39;idée des multiples de 6 peut-elle être reprise pour p-1 Pollard ?</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+			<span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">B</span><span class="o">//</span><span class="mi">6</span><span class="p">)</span><span class="o">*</span><span class="mi">6</span>
+			<span class="n">v6</span> <span class="o">=</span> <span class="n">lucas_mul</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+			<span class="n">Vl</span> <span class="o">=</span> <span class="p">[]</span>
+			<span class="n">Vl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lucas_mul</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">n</span><span class="p">))</span>
+			<span class="n">Vl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lucas_mul</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="mi">6</span><span class="p">,</span><span class="n">n</span><span class="p">))</span>
+			<span class="n">i</span> <span class="o">=</span> <span class="mi">2</span>
+			<span class="n">c</span> <span class="o">=</span> <span class="n">c</span><span class="o">+</span><span class="mi">12</span>
+			<span class="k">while</span><span class="p">(</span><span class="n">c</span><span class="o">&lt;</span><span class="n">B2</span><span class="p">):</span>
+				<span class="n">Vl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">Vl</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">v6</span> <span class="o">-</span> <span class="n">Vl</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">%</span> <span class="n">n</span> <span class="p">)</span>
+				<span class="n">c</span> <span class="o">+=</span> <span class="mi">6</span>
+				<span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="n">produit</span> <span class="o">=</span> <span class="mi">1</span>
+			<span class="k">for</span> <span class="n">vi</span> <span class="ow">in</span> <span class="n">Vl</span><span class="p">:</span>
+				<span class="n">produit</span> <span class="o">=</span> <span class="p">(</span> <span class="n">produit</span> <span class="o">*</span> <span class="p">(</span><span class="n">vi</span><span class="o">-</span><span class="n">v</span><span class="p">)</span> <span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+			<span class="n">g</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="n">produit</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+				<span class="n">B</span> <span class="o">*=</span> <span class="mi">10</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">alternate</span> <span class="o">=</span> <span class="bp">True</span>
+			
+	<span class="k">if</span><span class="p">(</span><span class="n">g</span><span class="o">!=</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">g</span><span class="o">!=</span><span class="n">n</span><span class="p">):</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> 
+			<span class="k">if</span><span class="p">(</span><span class="n">alternate</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pp1_williams_auto ( B&#39; =&quot;</span><span class="p">,</span><span class="n">B2</span><span class="p">,</span><span class="s2">&quot;) :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">n</span><span class="o">//</span><span class="n">g</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pp1_williams_auto ( B =&quot;</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="s2">&quot;) :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">n</span><span class="o">//</span><span class="n">g</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">g</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pp1_williams_auto failed with&quot;</span><span class="p">,</span> <span class="n">Bmax</span><span class="p">,</span> <span class="s2">&quot;:(&quot;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="mi">0</span></div>
+
+<span class="c1">#n = itools.rand_prime(2**25,2**36,20)*itools.rand_prime(2**25,2**36,20)</span>
+<span class="c1">#pm1_pollard_auto(n,1024000,True)</span>
+<span class="c1">#pp1_williams_auto(n,1000000,True)</span>
+
+<span class="k">def</span> <span class="nf">edwards_add</span><span class="p">(</span><span class="n">P1</span><span class="p">,</span><span class="n">P2</span><span class="p">,</span><span class="n">Edwards</span><span class="p">):</span>
+	<span class="n">x1</span><span class="p">,</span><span class="n">y1</span> <span class="o">=</span> <span class="n">P1</span>
+	<span class="n">x2</span><span class="p">,</span><span class="n">y2</span> <span class="o">=</span> <span class="n">P2</span>
+	<span class="n">a</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">n</span> <span class="o">=</span> <span class="n">Edwards</span>
+	<span class="n">x1y1</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="o">*</span><span class="n">y1</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+	<span class="n">x2y2</span> <span class="o">=</span> <span class="p">(</span><span class="n">x2</span><span class="o">*</span><span class="n">y2</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+	<span class="n">p</span> <span class="o">=</span> <span class="p">(</span> <span class="n">x1y1</span> <span class="o">+</span> <span class="n">x2y2</span> <span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+	<span class="n">q</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="n">y1</span><span class="o">*</span><span class="n">y2</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">x1</span><span class="o">*</span><span class="n">x2</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span> <span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="n">p</span><span class="o">//</span><span class="n">q</span>
+	<span class="n">y</span><span class="o">=-</span><span class="mi">1</span>
+	<span class="n">p</span> <span class="o">=</span> <span class="p">(</span> <span class="n">x1y1</span> <span class="o">-</span> <span class="n">x2y2</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+	<span class="n">q</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="n">x1</span><span class="o">*</span><span class="n">y2</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">y1</span><span class="o">*</span><span class="n">x2</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">q</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;edwards_add ERROR : division par 0&quot;</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span> <span class="n">y</span> <span class="o">=</span> <span class="n">p</span><span class="o">//</span><span class="n">q</span>
+	<span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">edwards_double</span><span class="p">(</span><span class="n">P1</span><span class="p">,</span><span class="n">Edwards</span><span class="p">):</span>
+	<span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">P</span>
+	<span class="n">a</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">n</span> <span class="o">=</span> <span class="n">Edwards</span>
+	<span class="n">xy</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+	<span class="n">x2</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+	<span class="n">y2</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+	<span class="k">return</span> <span class="p">(</span> <span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">xy</span><span class="p">)</span><span class="o">%</span><span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">d</span><span class="o">*</span><span class="p">((</span><span class="n">xy</span><span class="o">*</span><span class="n">xy</span><span class="p">)</span><span class="o">%</span><span class="n">n</span><span class="p">))</span><span class="o">%</span><span class="n">n</span><span class="p">)</span> <span class="p">),</span> <span class="p">(</span> <span class="p">((</span><span class="n">y2</span> <span class="o">-</span> <span class="n">a</span><span class="o">*</span><span class="n">x2</span><span class="p">)</span><span class="o">%</span><span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span> <span class="o">-</span> <span class="n">d</span><span class="o">*</span><span class="p">((</span><span class="n">xy</span><span class="o">*</span><span class="n">xy</span><span class="p">)</span><span class="o">%</span><span class="n">n</span><span class="p">))</span><span class="o">%</span><span class="n">n</span><span class="p">)</span> <span class="p">)</span>  
+	
+<span class="c1">#retourne un facteur de n</span>
+<span class="c1">#algorithme le plus efficace pour trouver des facteurs de moins de 25 chiffres</span>
+<span class="c1">#version avec courbes de d&#39;Edwards (plus rapide que les courbes de Montgomery)</span>
+<span class="c1">#E(a,d) : ax² + y² = 1 + dx²y²  (a et d non nuls)</span>
+<span class="c1">#On considère le cas où a = 1 et d != 0,1</span>
+<span class="c1">#TODO</span>
+<span class="k">def</span> <span class="nf">eecm</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+	<span class="n">u</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+	<span class="n">u2</span> <span class="o">=</span> <span class="p">(</span><span class="n">u</span><span class="o">*</span><span class="n">u</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+	<span class="n">u2p1</span> <span class="o">=</span> <span class="p">(</span><span class="n">u</span><span class="o">*</span><span class="n">u</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">n</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="p">((</span><span class="n">u2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">n</span><span class="p">)</span><span class="o">//</span><span class="n">u2p1</span>
+	<span class="n">y</span> <span class="o">=</span> <span class="p">(((</span><span class="n">u</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">u</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">%</span><span class="n">n</span><span class="p">)</span><span class="o">//</span><span class="n">u2p1</span>
+	<span class="n">d1</span> <span class="o">=</span> <span class="p">(</span> <span class="p">((</span><span class="n">u2p1</span><span class="o">*</span><span class="n">u2p1</span><span class="p">)</span><span class="o">%</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">u2p1</span><span class="p">)</span> <span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+	<span class="n">d1</span> <span class="o">=</span> <span class="p">(</span> <span class="n">d1</span><span class="o">*</span><span class="p">(</span><span class="n">u2</span><span class="o">-</span><span class="mi">4</span><span class="o">*</span><span class="n">u</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+	<span class="n">d2</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="n">u</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">u</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+	<span class="n">d2</span> <span class="o">=</span> <span class="p">(</span> <span class="p">((</span><span class="n">d2</span><span class="o">*</span><span class="n">d2</span><span class="p">)</span><span class="o">%</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">d2</span> <span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+	<span class="n">d2</span> <span class="o">=</span> <span class="p">(</span><span class="n">d2</span> <span class="o">*</span> <span class="p">((</span><span class="n">u</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">u</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">%</span><span class="n">n</span> <span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
+	<span class="n">d</span> <span class="o">=</span> <span class="n">d1</span> <span class="o">//</span> <span class="n">d2</span>
+	
+
+	
+<span class="c1">#TODO : version avec Courbes d&#39;Edward</span>
+
+
+<span class="c1">#TODO : Multiple Polynomial Quadratic Sieve (MPQS) =&gt; cf COURS CRYPTO (GNFS trop compliqué)</span>
+<span class="c1">#MPQS : méthode la plus rapide pour trouver des facteurs entre 25 et 100 chiffres</span>
+
+<span class="c1">#TODO : fonction de facorisation appelant d&#39;abord p-1,p+1, puis rho &amp; ECM puis MPQS</span>
+
+<span class="k">def</span> <span class="nf">dico_add_to_first</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span><span class="n">d2</span><span class="p">):</span>
+	<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">d2</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+		<span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">d1</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+			<span class="n">d1</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">+=</span> <span class="n">d2</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">d1</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">d2</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+			
+
+<span class="k">def</span> <span class="nf">easy_facto</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="n">dico</span> <span class="o">=</span> <span class="p">{}</span>
+	<span class="n">p</span> <span class="o">=</span> <span class="n">n</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">itools</span><span class="o">.</span><span class="n">rabin_miller</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="bp">False</span><span class="p">):</span>
+		<span class="n">q</span> <span class="o">=</span> <span class="n">rho_pollard_brent_p</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">q</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">itools</span><span class="o">.</span><span class="n">rabin_miller</span><span class="p">(</span><span class="n">q</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="bp">True</span><span class="p">):</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">q</span> <span class="ow">in</span> <span class="n">dico</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+					<span class="n">dico</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">dico</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">dico_add_to_first</span><span class="p">(</span><span class="n">dico</span><span class="p">,</span> <span class="n">easy_facto</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
+			<span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">//</span><span class="n">q</span>
+
+	<span class="k">if</span><span class="p">(</span><span class="n">p</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">p</span> <span class="ow">in</span> <span class="n">dico</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+			<span class="n">dico</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">dico</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;easy_facto :</span><span class="se">\n</span><span class="s2">N =&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">factorisation :&quot;</span><span class="p">,</span> <span class="n">dico</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">dico</span>
+
+<span class="c1">#print(easy_facto(344))	</span>
+<span class="c1">#print(easy_facto(random.randint(1,100000000)))</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Amaury Behague, Raphaël Roblin.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

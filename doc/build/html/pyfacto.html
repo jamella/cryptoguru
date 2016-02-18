@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>pyfacto : factor small to large integers &mdash; cryptoguru Beta documentation</title>
+    <title>pyfacto : useful factoring tools &mdash; cryptoguru Beta documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -39,13 +39,257 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="pyfacto-factor-small-to-large-integers">
-<h1><strong>pyfacto</strong> : <em>factor small to large integers</em><a class="headerlink" href="#pyfacto-factor-small-to-large-integers" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="pyfacto-useful-factoring-tools">
+<h1><strong>pyfacto</strong> : <em>useful factoring tools</em><a class="headerlink" href="#pyfacto-useful-factoring-tools" title="Permalink to this headline">¶</a></h1>
 <p><a class="reference internal" href="index.html#index"><span>Home : cryptoguru&#8217;s documentation</span></a> |
 <a class="reference internal" href="genindex.html"><span>Index</span></a>&nbsp;|
 <a class="reference internal" href="py-modindex.html"><span>Module Index</span></a> |
 <a class="reference internal" href="search.html"><span>Search Page</span></a> |</p>
-<span class="target" id="module-pyfacto"></span></div>
+<span class="target" id="module-pyfacto"></span><dl class="function">
+<dt id="pyfacto.facto_fermat">
+<code class="descclassname">pyfacto.</code><code class="descname">facto_fermat</code><span class="sig-paren">(</span><em>n</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyfacto.html#facto_fermat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyfacto.facto_fermat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fermat&#8217;s factoring algorithm.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: an odd integer</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: a subfactor of n.</li>
+</ul>
+</dd>
+</dl>
+<p>Not very efficient.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfacto.lucas_mul">
+<code class="descclassname">pyfacto.</code><code class="descname">lucas_mul</code><span class="sig-paren">(</span><em>v</em>, <em>q</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyfacto.html#lucas_mul"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyfacto.lucas_mul" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes an index multiplication in a Lucas sequence.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>v (int)</em>: V[m]</li>
+<li><em>q (int)</em>: the multiplicator of the index</li>
+<li><em>n (int)</em>: the modulo</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: V[mq] mod n</li>
+</ul>
+</dd>
+<dt>V is defined by <span class="classifier-delimiter">:</span> <span class="classifier"></span></dt>
+<dd>V[i] = A*V[i-1] - V[i-2] with some A.</dd>
+<dt>This function uses the following fomulas :</dt>
+<dd>V[2n] = V[n]*V[n] - 2
+V[m+n] = V[m]*V[n] - V[m-n]</dd>
+</dl>
+<p>V[qm] and V[(q+1)m] are computed at the same time to solve the index addition dependency.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfacto.pm1_pollard">
+<code class="descclassname">pyfacto.</code><code class="descname">pm1_pollard</code><span class="sig-paren">(</span><em>n</em>, <em>B</em>, <em>nbRM=20</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyfacto.html#pm1_pollard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyfacto.pm1_pollard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pollard&#8217;s p-1 factoring algorithm.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: an integer</li>
+<li><em>B (int)</em>: smooth boundary</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>nbRM (int)</em>: number of repeats of Rabin-Miller primality test.</li>
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>(int)</em>: a subfactor p of n such that p-1 is B-smooth if it exists.</dt>
+<dd><p class="first last">0 if attack failed.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfacto.pm1_pollard_auto">
+<code class="descclassname">pyfacto.</code><code class="descname">pm1_pollard_auto</code><span class="sig-paren">(</span><em>n</em>, <em>Bmax</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyfacto.html#pm1_pollard_auto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyfacto.pm1_pollard_auto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pollard&#8217;s p-1 factoring algorithm with automatic Boundary adjustment.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: an integer</li>
+<li><em>Bmax (int)</em>: Maximum smooth boundary</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>(int)</em>: a subfactor p of n such that p-1 is B-smooth if it exists.</dt>
+<dd><p class="first last">0 if attack failed.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfacto.pp1_williams">
+<code class="descclassname">pyfacto.</code><code class="descname">pp1_williams</code><span class="sig-paren">(</span><em>n</em>, <em>B</em>, <em>nbRM=20</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyfacto.html#pp1_williams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyfacto.pp1_williams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Williams&#8217; p+1 factoring algorithm.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: an integer</li>
+<li><em>B (int)</em>: smooth boundary</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>nbRM (int)</em>: number of repeats of Rabin-Miller primality test.</li>
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>(int)</em>: a subfactor p of n such that p+1 is B-smooth if it exists.</dt>
+<dd><p class="first last">0 if attack failed.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfacto.pp1_williams_auto">
+<code class="descclassname">pyfacto.</code><code class="descname">pp1_williams_auto</code><span class="sig-paren">(</span><em>n</em>, <em>Bmax</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyfacto.html#pp1_williams_auto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyfacto.pp1_williams_auto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Williams&#8217; p+1 factoring algorithm with automatic Boundary adjustment.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: an integer</li>
+<li><em>Bmax (int)</em>: Maximum smooth boundary</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>(int)</em>: a subfactor p of n such that p+1 is B-smooth if it exists.</dt>
+<dd><p class="first last">0 if attack failed.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfacto.rho_pollard">
+<code class="descclassname">pyfacto.</code><code class="descname">rho_pollard</code><span class="sig-paren">(</span><em>n</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyfacto.html#rho_pollard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyfacto.rho_pollard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pollard&#8217;s Rho algorithm applied to factoring.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: a non-prime integer</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: a small factor of n</li>
+</ul>
+</dd>
+</dl>
+<p>Simple and efficient.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfacto.rho_pollard_brent">
+<code class="descclassname">pyfacto.</code><code class="descname">rho_pollard_brent</code><span class="sig-paren">(</span><em>n</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyfacto.html#rho_pollard_brent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyfacto.rho_pollard_brent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Brent&#8217;s improved version of Pollard&#8217;s Rho algorithm applied to factoring.
+<em>(source : http://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf)</em></p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: a non-prime integer</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: a small factor of n</li>
+</ul>
+</dd>
+</dl>
+<p>Clearly more efficient than the standard Pollard&#8217;s Rho algorithm.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyfacto.rho_pollard_brent_p">
+<code class="descclassname">pyfacto.</code><code class="descname">rho_pollard_brent_p</code><span class="sig-paren">(</span><em>n</em>, <em>jobs=8</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyfacto.html#rho_pollard_brent_p"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyfacto.rho_pollard_brent_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Brent&#8217;s improved &amp; parallelized version of Pollard&#8217;s Rho algorithm applied to factoring.
+<em>(source : http://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf)</em></p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: a non-prime integer</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>jobs (int)</em>: number of threads to launch. Should be your number of virtual cores.</li>
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: a small factor of n</li>
+</ul>
+</dd>
+<dt>Limited efficiency due to no communication between the processes :</dt>
+<dd>Acceleration ~ sqrt(jobs)</dd>
+</dl>
+</dd></dl>
+
+</div>
 
 
           </div>

@@ -98,7 +98,7 @@
 <span class="sd">	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
-	<span class="c1">#brute force to start</span>
+	<span class="c1">#Bruteforce to start</span>
 	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Brute forcing..&quot;</span><span class="p">)</span>
 	<span class="n">x</span> <span class="o">=</span> <span class="n">g</span>
 	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">min</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">)):</span>
@@ -173,7 +173,7 @@
 <span class="sd">		- *(int)*: x such that [x]g = h mod n</span>
 <span class="sd">	</span>
 <span class="sd">	&quot;&quot;&quot;</span>
-	<span class="c1">#brute force pour commencer</span>
+	<span class="c1">#Bruteforce to start</span>
 	<span class="n">x</span> <span class="o">=</span> <span class="n">g</span>
 	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Brute Forcing..&quot;</span><span class="p">)</span>
 	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">min</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">)):</span>
@@ -270,12 +270,6 @@
 			
 	
 
-<span class="c1">#retourne x tel que [x]g = h mod n</span>
-<span class="c1">#p : ordre du groupe dont g est le générateur</span>
-<span class="c1">#b : borne maximale pour les puissances de la fonction de marche aléatoire, p semble plus efficace que les petites valeurs</span>
-<span class="c1">#k : nombre de parties</span>
-<span class="c1">#jobs : nombre de sous-routines à lancer dans la parallélisation (à ajuster selon le nombre de coeurs logiques)</span>
-<span class="c1">#pré-requis : p premier, h dans &lt;g&gt;</span>
 <div class="viewcode-block" id="rho_pollard_dlp_par"><a class="viewcode-back" href="../pwndlp.html#pwndlp.rho_pollard_dlp_par">[docs]</a><span class="k">def</span> <span class="nf">rho_pollard_dlp_par</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">jobs</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;Improved parallelized version of Pollard&#39;s Rho applied to DLP. Uses distinguished points for optimal efficiency.</span>
 <span class="sd">	</span>
