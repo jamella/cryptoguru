@@ -45,9 +45,114 @@
 <a class="reference internal" href="py-modindex.html"><span>Module Index</span></a> |
 <a class="reference internal" href="search.html"><span>Search Page</span></a> |</p>
 <span class="target" id="module-pwndlp"></span><dl class="function">
+<dt id="pwndlp.pohlig_hellman">
+<code class="descclassname">pwndlp.</code><code class="descname">pohlig_hellman</code><span class="sig-paren">(</span><em>g</em>, <em>h</em>, <em>n</em>, <em>log_file</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pwndlp.html#pohlig_hellman"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pwndlp.pohlig_hellman" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pohlig-Hellman&#8217;s algorithm to solve DLP.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>g (int)</em>: a generator</li>
+<li><em>h (int)</em>: an integer in &lt;g&gt;</li>
+<li><em>n (int)</em>: the modulo</li>
+<li><em>log_file (File)</em>: an opened file in which results will be written</li>
+</ul>
+</dd>
+<dt>Optional args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: x such that [x mod n-1]g = h mod n</li>
+</ul>
+</dd>
+</dl>
+<p>This functions factors n-1 in prime integers in order to be able to call Pollard&#8217;s Rho on the subgroups
+and then reconstructs the result with the CRT.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="pwndlp.rho_pollard_dlp">
 <code class="descclassname">pwndlp.</code><code class="descname">rho_pollard_dlp</code><span class="sig-paren">(</span><em>g</em>, <em>h</em>, <em>p</em>, <em>n</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pwndlp.html#rho_pollard_dlp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pwndlp.rho_pollard_dlp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pollard&#8217;s Rho applied to DLP.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>g (int)</em>: a generator</li>
+<li><em>h (int)</em>: an integer in &lt;g&gt;</li>
+<li><em>p (int)</em>: the order of &lt;g&gt;, must be prime (else call Pohlig-Hellman first).</li>
+<li><em>n (int)</em>: the modulo</li>
+</ul>
+</dd>
+<dt>Optional args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: x such that [x]g = h mod n</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pwndlp.rho_pollard_dlp_adv">
+<code class="descclassname">pwndlp.</code><code class="descname">rho_pollard_dlp_adv</code><span class="sig-paren">(</span><em>g</em>, <em>h</em>, <em>p</em>, <em>n</em>, <em>b</em>, <em>k</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pwndlp.html#rho_pollard_dlp_adv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pwndlp.rho_pollard_dlp_adv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Improved version of Pollard&#8217;s Rho applied to DLP. It uses k-adding walks.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>g (int)</em>: a generator</li>
+<li><em>h (int)</em>: an integer in &lt;g&gt;</li>
+<li><em>p (int)</em>: the order of &lt;g&gt;, must be prime (else call Pohlig-Hellman first)</li>
+<li><em>n (int)</em>: the modulo</li>
+<li><em>b (int)</em>: exponent bound used to generate random walks (p seems to be the best)</li>
+<li><em>k (int)</em>: number of partitions (20 or more is advised)</li>
+</ul>
+</dd>
+<dt>Optional args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: x such that [x]g = h mod n</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pwndlp.rho_pollard_dlp_par">
+<code class="descclassname">pwndlp.</code><code class="descname">rho_pollard_dlp_par</code><span class="sig-paren">(</span><em>g</em>, <em>h</em>, <em>p</em>, <em>n</em>, <em>b</em>, <em>k</em>, <em>jobs=8</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pwndlp.html#rho_pollard_dlp_par"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pwndlp.rho_pollard_dlp_par" title="Permalink to this definition">¶</a></dt>
+<dd><p>Improved parallelized version of Pollard&#8217;s Rho applied to DLP. Uses distinguished points for optimal efficiency.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>g (int)</em>: a generator</li>
+<li><em>h (int)</em>: an integer in &lt;g&gt;</li>
+<li><em>p (int)</em>: the order of &lt;g&gt;, must be prime (else call Pohlig-Hellman first)</li>
+<li><em>n (int)</em>: the modulo</li>
+<li><em>b (int)</em>: exponent bound used to generate random walks (p seems to be the best)</li>
+<li><em>k (int)</em>: number of partitions (20 or more is advised)</li>
+</ul>
+</dd>
+<dt>Optional args:</dt>
+<dd><ul class="first last simple">
+<li><em>jobs (int)</em>: number of threads to launch. Should be your number of virtual cores.</li>
+<li><em>verbose (bool)</em>: set to True if you want a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li><em>(int)</em>: x such that [x]g = h mod n</li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

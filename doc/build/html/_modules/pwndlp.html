@@ -80,13 +80,25 @@
 
 <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">()</span>
 
-<span class="c1">#retourne x tel que [x]g = h mod n</span>
-<span class="c1">#p : ordre du groupe dont g est le générateur</span>
-<span class="c1">#pré-requis : p premier, h dans &lt;g&gt;</span>
+
 <div class="viewcode-block" id="rho_pollard_dlp"><a class="viewcode-back" href="../pwndlp.html#pwndlp.rho_pollard_dlp">[docs]</a><span class="k">def</span> <span class="nf">rho_pollard_dlp</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Pollard&#39;s Rho applied to DLP.&quot;&quot;&quot;</span>
+	<span class="sd">&quot;&quot;&quot;Pollard&#39;s Rho applied to DLP.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *g (int)*: a generator</span>
+<span class="sd">		- *h (int)*: an integer in &lt;g&gt;</span>
+<span class="sd">		- *p (int)*: the order of &lt;g&gt;, must be prime (else call Pohlig-Hellman first).</span>
+<span class="sd">		- *n (int)*: the modulo</span>
+<span class="sd">		</span>
+<span class="sd">	Optional args:</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: x such that [x]g = h mod n</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	
-	<span class="c1">#brute force pour commencer</span>
+	<span class="c1">#brute force to start</span>
 	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Brute forcing..&quot;</span><span class="p">)</span>
 	<span class="n">x</span> <span class="o">=</span> <span class="n">g</span>
 	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">min</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">)):</span>
@@ -95,7 +107,7 @@
 			<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho_pollard_dlp :</span><span class="se">\n</span><span class="s2">[&quot;</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;]&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
 			<span class="k">return</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
 	
-	<span class="c1">#puis rho standard</span>
+	<span class="c1">#then standard rho</span>
 	<span class="n">S0</span> <span class="o">=</span> <span class="n">n</span><span class="o">//</span><span class="mi">3</span>
 	<span class="n">S1</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">//</span><span class="mi">3</span><span class="p">)</span>
 	<span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
@@ -142,12 +154,25 @@
 	<span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">%</span><span class="n">p</span></div>
 
 
-<span class="c1">#retourne x tel que [x]g = h mod n</span>
-<span class="c1">#p : ordre du groupe dont g est le générateur</span>
-<span class="c1">#b : borne maximale pour les puissances de la fonction de marche aléatoire, p semble plus efficace que les petites valeurs</span>
-<span class="c1">#k : nombre de parties</span>
-<span class="c1">#pré-requis : p premier, h dans &lt;g&gt;</span>
-<span class="k">def</span> <span class="nf">rho_pollard_dlp_adv</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<span class="c1">#TODO: use mixed walks (instead of only adding walks).</span>
+<div class="viewcode-block" id="rho_pollard_dlp_adv"><a class="viewcode-back" href="../pwndlp.html#pwndlp.rho_pollard_dlp_adv">[docs]</a><span class="k">def</span> <span class="nf">rho_pollard_dlp_adv</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Improved version of Pollard&#39;s Rho applied to DLP. It uses k-adding walks.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *g (int)*: a generator</span>
+<span class="sd">		- *h (int)*: an integer in &lt;g&gt;</span>
+<span class="sd">		- *p (int)*: the order of &lt;g&gt;, must be prime (else call Pohlig-Hellman first)</span>
+<span class="sd">		- *n (int)*: the modulo</span>
+<span class="sd">		- *b (int)*: exponent bound used to generate random walks (p seems to be the best)</span>
+<span class="sd">		- *k (int)*: number of partitions (20 or more is advised)</span>
+<span class="sd">		</span>
+<span class="sd">	Optional args:</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: x such that [x]g = h mod n</span>
+<span class="sd">	</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="c1">#brute force pour commencer</span>
 	<span class="n">x</span> <span class="o">=</span> <span class="n">g</span>
 	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Brute Forcing..&quot;</span><span class="p">)</span>
@@ -200,9 +225,10 @@
 
 	<span class="n">y</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">inversion_modulaire</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
 	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho_pollard_dlp_adv :</span><span class="se">\n</span><span class="s2">[&quot;</span><span class="p">,(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">%</span><span class="n">p</span><span class="p">,</span><span class="s2">&quot;]&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
-	<span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">%</span><span class="n">p</span>
+	<span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">%</span><span class="n">p</span></div>
 	
-<span class="c1">#sous-routine pour rho pollard parallélisé</span>
+<span class="c1">#sub-function for parallelized Pollard&#39;s Rho</span>
+<span class="c1">#TODO: set distinguished points criteria dynamically.</span>
 <span class="k">def</span> <span class="nf">sub_rho</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">puissances</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">dico</span><span class="p">):</span>
 	
 	<span class="k">if</span><span class="p">(</span><span class="n">itools</span><span class="o">.</span><span class="n">ilog</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">40</span><span class="p">):</span>
@@ -250,8 +276,26 @@
 <span class="c1">#k : nombre de parties</span>
 <span class="c1">#jobs : nombre de sous-routines à lancer dans la parallélisation (à ajuster selon le nombre de coeurs logiques)</span>
 <span class="c1">#pré-requis : p premier, h dans &lt;g&gt;</span>
-<span class="k">def</span> <span class="nf">rho_pollard_dlp_par</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">jobs</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-	<span class="c1">#brute force pour commencer</span>
+<div class="viewcode-block" id="rho_pollard_dlp_par"><a class="viewcode-back" href="../pwndlp.html#pwndlp.rho_pollard_dlp_par">[docs]</a><span class="k">def</span> <span class="nf">rho_pollard_dlp_par</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">jobs</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Improved parallelized version of Pollard&#39;s Rho applied to DLP. Uses distinguished points for optimal efficiency.</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">		- *g (int)*: a generator</span>
+<span class="sd">		- *h (int)*: an integer in &lt;g&gt;</span>
+<span class="sd">		- *p (int)*: the order of &lt;g&gt;, must be prime (else call Pohlig-Hellman first)</span>
+<span class="sd">		- *n (int)*: the modulo</span>
+<span class="sd">		- *b (int)*: exponent bound used to generate random walks (p seems to be the best)</span>
+<span class="sd">		- *k (int)*: number of partitions (20 or more is advised)</span>
+<span class="sd">		</span>
+<span class="sd">	Optional args:</span>
+<span class="sd">		- *jobs (int)*: number of threads to launch. Should be your number of virtual cores.</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: x such that [x]g = h mod n</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="c1">#Bruteforce to start</span>
 	<span class="n">x</span> <span class="o">=</span> <span class="n">g</span>
 	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Brute Forcing..&quot;</span><span class="p">)</span>
 	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">min</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">)):</span>
@@ -284,12 +328,29 @@
 	<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">procs</span><span class="p">:</span>
 		<span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
 	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;rho_pollard_dlp_par :</span><span class="se">\n</span><span class="s2">[&quot;</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="s2">&quot;]&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">h</span><span class="p">)</span>
-	<span class="k">return</span> <span class="n">x</span>
+	<span class="k">return</span> <span class="n">x</span></div>
 		
 
-<span class="c1">#Résout un DLP dans Z/nZ*</span>
-<span class="c1">#g un générateur, on cherche x tq [x mod n-1]g = h mod n</span>
-<span class="k">def</span> <span class="nf">pohlig_hellman</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">log_file</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="pohlig_hellman"><a class="viewcode-back" href="../pwndlp.html#pwndlp.pohlig_hellman">[docs]</a><span class="k">def</span> <span class="nf">pohlig_hellman</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">log_file</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Pohlig-Hellman&#39;s algorithm to solve DLP.</span>
+
+<span class="sd">	Args:</span>
+<span class="sd">		- *g (int)*: a generator</span>
+<span class="sd">		- *h (int)*: an integer in &lt;g&gt;</span>
+<span class="sd">		- *n (int)*: the modulo</span>
+<span class="sd">		- *log_file (File)*: an opened file in which results will be written</span>
+<span class="sd">		</span>
+<span class="sd">	Optional args:</span>
+<span class="sd">		- *verbose (bool)*: set to True if you want a display.</span>
+<span class="sd">		</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		- *(int)*: x such that [x mod n-1]g = h mod n</span>
+<span class="sd">	</span>
+<span class="sd">	This functions factors n-1 in prime integers in order to be able to call Pollard&#39;s Rho on the subgroups</span>
+<span class="sd">	and then reconstructs the result with the CRT.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	
 	<span class="n">p</span> <span class="o">=</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span>
 	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span><span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">==== POHLIG_HELLMAN ====&quot;</span><span class="p">)</span>
 	<span class="n">facteurs</span> <span class="o">=</span> <span class="n">pyfacto</span><span class="o">.</span><span class="n">easy_facto</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
@@ -318,7 +379,7 @@
 		<span class="n">Ln</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pi</span><span class="o">**</span><span class="n">ei</span><span class="p">)</span>
 	<span class="n">x</span> <span class="o">=</span> <span class="n">itools</span><span class="o">.</span><span class="n">crt</span><span class="p">(</span><span class="n">La</span><span class="p">,</span><span class="n">Ln</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
 	<span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s2">&quot;pohlig_hellman :</span><span class="se">\n</span><span class="s2">[&quot;</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="s2">&quot;]&quot;</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="n">itools</span><span class="o">.</span><span class="n">exp_mod</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">n</span><span class="p">))</span>
-	<span class="k">return</span> <span class="n">x</span>
+	<span class="k">return</span> <span class="n">x</span></div>
 
 
 </pre></div>

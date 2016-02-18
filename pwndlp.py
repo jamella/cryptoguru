@@ -39,13 +39,25 @@ from multiprocessing import Process, Queue
 
 random.seed()
 
-#retourne x tel que [x]g = h mod n
-#p : ordre du groupe dont g est le générateur
-#pré-requis : p premier, h dans <g>
+
 def rho_pollard_dlp(g, h, p, n, verbose=False):
-	"""Pollard's Rho applied to DLP."""
+	"""Pollard's Rho applied to DLP.
 	
-	#brute force pour commencer
+	Args:
+		- *g (int)*: a generator
+		- *h (int)*: an integer in <g>
+		- *p (int)*: the order of <g>, must be prime (else call Pohlig-Hellman first).
+		- *n (int)*: the modulo
+		
+	Optional args:
+		- *verbose (bool)*: set to True if you want a display.
+		
+	Returns:
+		- *(int)*: x such that [x]g = h mod n
+	
+	"""
+	
+	#Bruteforce to start
 	if(verbose): print("Brute forcing..")
 	x = g
 	for i in range(1,min(p+1,100)):
@@ -54,7 +66,7 @@ def rho_pollard_dlp(g, h, p, n, verbose=False):
 			if(verbose): print("rho_pollard_dlp :\n[",i+1,"]",g,"=",h)
 			return i+1
 	
-	#puis rho standard
+	#then standard rho
 	S0 = n//3
 	S1 = 2*(n//3)
 	x,y = 0,0
@@ -101,13 +113,26 @@ def rho_pollard_dlp(g, h, p, n, verbose=False):
 	return (x*y)%p
 
 
-#retourne x tel que [x]g = h mod n
-#p : ordre du groupe dont g est le générateur
-#b : borne maximale pour les puissances de la fonction de marche aléatoire, p semble plus efficace que les petites valeurs
-#k : nombre de parties
-#pré-requis : p premier, h dans <g>
+#TODO: use mixed walks (instead of only adding walks).
 def rho_pollard_dlp_adv(g, h, p, n, b, k, verbose=False):
-	#brute force pour commencer
+	"""Improved version of Pollard's Rho applied to DLP. It uses k-adding walks.
+	
+	Args:
+		- *g (int)*: a generator
+		- *h (int)*: an integer in <g>
+		- *p (int)*: the order of <g>, must be prime (else call Pohlig-Hellman first)
+		- *n (int)*: the modulo
+		- *b (int)*: exponent bound used to generate random walks (p seems to be the best)
+		- *k (int)*: number of partitions (20 or more is advised)
+		
+	Optional args:
+		- *verbose (bool)*: set to True if you want a display.
+		
+	Returns:
+		- *(int)*: x such that [x]g = h mod n
+	
+	"""
+	#Bruteforce to start
 	x = g
 	if(verbose): print("Brute Forcing..")
 	for i in range(1,min(p+1,100)):
@@ -161,7 +186,8 @@ def rho_pollard_dlp_adv(g, h, p, n, b, k, verbose=False):
 	if(verbose): print("rho_pollard_dlp_adv :\n[",(x*y)%p,"]",g,"=",h)
 	return (x*y)%p
 	
-#sous-routine pour rho pollard parallélisé
+#sub-function for parallelized Pollard's Rho
+#TODO: set distinguished points criteria dynamically.
 def sub_rho(g, h, p, n, coefficients, puissances, k, dico):
 	
 	if(itools.ilog(n,2) > 40):
@@ -203,14 +229,26 @@ def sub_rho(g, h, p, n, coefficients, puissances, k, dico):
 			
 	
 
-#retourne x tel que [x]g = h mod n
-#p : ordre du groupe dont g est le générateur
-#b : borne maximale pour les puissances de la fonction de marche aléatoire, p semble plus efficace que les petites valeurs
-#k : nombre de parties
-#jobs : nombre de sous-routines à lancer dans la parallélisation (à ajuster selon le nombre de coeurs logiques)
-#pré-requis : p premier, h dans <g>
 def rho_pollard_dlp_par(g, h, p, n, b, k, jobs=8, verbose=False):
-	#brute force pour commencer
+	"""Improved parallelized version of Pollard's Rho applied to DLP. Uses distinguished points for optimal efficiency.
+	
+	Args:
+		- *g (int)*: a generator
+		- *h (int)*: an integer in <g>
+		- *p (int)*: the order of <g>, must be prime (else call Pohlig-Hellman first)
+		- *n (int)*: the modulo
+		- *b (int)*: exponent bound used to generate random walks (p seems to be the best)
+		- *k (int)*: number of partitions (20 or more is advised)
+		
+	Optional args:
+		- *jobs (int)*: number of threads to launch. Should be your number of virtual cores.
+		- *verbose (bool)*: set to True if you want a display.
+		
+	Returns:
+		- *(int)*: x such that [x]g = h mod n
+	"""
+	
+	#Bruteforce to start
 	x = g
 	if(verbose): print("Brute Forcing..")
 	for i in range(1,min(p+1,100)):
@@ -246,9 +284,26 @@ def rho_pollard_dlp_par(g, h, p, n, b, k, jobs=8, verbose=False):
 	return x
 		
 
-#Résout un DLP dans Z/nZ*
-#g un générateur, on cherche x tq [x mod n-1]g = h mod n
 def pohlig_hellman(g, h, n, log_file, verbose=False):
+	"""Pohlig-Hellman's algorithm to solve DLP.
+
+	Args:
+		- *g (int)*: a generator
+		- *h (int)*: an integer in <g>
+		- *n (int)*: the modulo
+		- *log_file (File)*: an opened file in which results will be written
+		
+	Optional args:
+		- *verbose (bool)*: set to True if you want a display.
+		
+	Returns:
+		- *(int)*: x such that [x mod n-1]g = h mod n
+	
+	This functions factors n-1 in prime integers in order to be able to call Pollard's Rho on the subgroups
+	and then reconstructs the result with the CRT.
+	"""
+	
+	
 	p = n-1
 	if(verbose):print("\n==== POHLIG_HELLMAN ====")
 	facteurs = pyfacto.easy_facto(n-1,verbose)
