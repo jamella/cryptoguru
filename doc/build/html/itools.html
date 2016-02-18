@@ -39,8 +39,177 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="itools-useful-integer-fonctions">
-<h1>itools : useful integer fonctions<a class="headerlink" href="#itools-useful-integer-fonctions" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-itools">
+<span id="itools-useful-integer-fonctions"></span><h1>itools : useful integer fonctions<a class="headerlink" href="#module-itools" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="itools.crt">
+<code class="descclassname">itools.</code><code class="descname">crt</code><span class="sig-paren">(</span><em>La</em>, <em>Ln</em>, <em>N=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/itools.html#crt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#itools.crt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses the Chinese Remainder Theorem to deduct X = La[i] mod Ln[i] for all i &lt; len(La) = len(Ln)
+X is computed modulo N which is the product of the elements of Ln.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>La (List): a list of integers
+Ln (List): a list of integers, which size must be len(La).</dd>
+<dt>Optional args:</dt>
+<dd>N (int): the final modulo. Will be computed if omitted.</dd>
+<dt>Returns:</dt>
+<dd>(int) the result of the reconstruction modulo N.</dd>
+</dl>
+<p>For all i, the following statement should be true :
+La[i] &lt; Ln[i]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="itools.euclide_extended">
+<code class="descclassname">itools.</code><code class="descname">euclide_extended</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/itools.html#euclide_extended"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#itools.euclide_extended" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extended version of Euclide&#8217;s algorithm.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>a (int): some integer
+b (int): some integer</dd>
+<dt>Optional args:</dt>
+<dd>verbose (bool): Set to True to get a display</dd>
+<dt>Returns:</dt>
+<dd>(int,int,int) Three integers, the first one is the gcd, the others are Bezout coefs.</dd>
+</dl>
+<p>It doesn&#8217;t matter if a&lt;b, the algorithm switches a and b if necessary.
+However, if a &lt; b, the first coefficient returned will be the one associated to b (gcd,coef_b,coef_a).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="itools.exp_mod">
+<code class="descclassname">itools.</code><code class="descname">exp_mod</code><span class="sig-paren">(</span><em>a</em>, <em>n</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/itools.html#exp_mod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#itools.exp_mod" title="Permalink to this definition">¶</a></dt>
+<dd><p>An efficient function to compute a^n mod p.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>a (int): an integer
+n (int): an integer
+p (int): an integer &gt; a</dd>
+<dt>Returns:</dt>
+<dd>int. a^n mod p</dd>
+</dl>
+<p>Actually just a custom implementation of fastexp. Uses the binary decomposition of n.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="itools.gcd">
+<code class="descclassname">itools.</code><code class="descname">gcd</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/itools.html#gcd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#itools.gcd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the greatest common divisor.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>a (int): some integer
+b (int): some integer</dd>
+<dt>Returns:</dt>
+<dd>(int) The GCD.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="itools.get_group">
+<code class="descclassname">itools.</code><code class="descname">get_group</code><span class="sig-paren">(</span><em>n</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/itools.html#get_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#itools.get_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a &#8220;safe&#8221; group for the DLP</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>n (int): a prime integer : security modulo / prime seed</dd>
+<dt>Optional Args:</dt>
+<dd>verbose (bool): set to True if you want a display.</dd>
+<dt>Returns:</dt>
+<dd>(int,int) g,p with p a prime integer such that p = k*n with some small integer k. And g is a generator of Z/pZ*</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="itools.get_primes">
+<code class="descclassname">itools.</code><code class="descname">get_primes</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>k</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/itools.html#get_primes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#itools.get_primes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the list of primes between two integers.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>a (int): an integer
+b (int): an integer such as b &gt; a
+k (int): the number of repetitions Rabin-Miller primality test.</dd>
+<dt>Optional Args:</dt>
+<dd>verbose (bool): set to True if you want a display.</dd>
+<dt>Returns:</dt>
+<dd>(List) the list of pseudo-prime integers in [a,b[</dd>
+</dl>
+<p>Why &#8220;pseudo-prime&#8221;? Because you can never be sure that they are prime with RM primality test.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="itools.ilog">
+<code class="descclassname">itools.</code><code class="descname">ilog</code><span class="sig-paren">(</span><em>x</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/itools.html#ilog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#itools.ilog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer logarithm in base b.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>x (int): an integer
+b (int): a base</dd>
+<dt>Returns:</dt>
+<dd>int. The greatest integer l such that b**l &lt;= x.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="itools.inversion_modulaire">
+<code class="descclassname">itools.</code><code class="descname">inversion_modulaire</code><span class="sig-paren">(</span><em>a</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/itools.html#inversion_modulaire"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#itools.inversion_modulaire" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverts a mod p.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>a (int): some integer
+p (int): some integer, greater than a</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>(int) 1/a mod p if gcd(a,p) = 1</dt>
+<dd>0 if gcd(a,p) &gt; 1</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="itools.isqrt">
+<code class="descclassname">itools.</code><code class="descname">isqrt</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/itools.html#isqrt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#itools.isqrt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer Square Root.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>n (int): an integer</dd>
+<dt>Returns:</dt>
+<dd>int. The greatest int s such that s*s &lt;= n.</dd>
+</dl>
+<p>Uses Newton&#8217;s iterative method.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="itools.rabin_miller">
+<code class="descclassname">itools.</code><code class="descname">rabin_miller</code><span class="sig-paren">(</span><em>n</em>, <em>k=1</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/itools.html#rabin_miller"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#itools.rabin_miller" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rabin-Miller primality test.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>n (int) : the integer which primality you wish to test</dd>
+<dt>Optional Args:</dt>
+<dd>k (int) : number of repetitions of the test
+verbose (boot) : set to True if you want a display</dd>
+</dl>
+<p>If this test returns False, you are 100% sure that n isn&#8217;t prime.
+However, if this test returns True, there&#8217;s a probability of 1/(2**k) that n isn&#8217;t prime.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="itools.rand_prime">
+<code class="descclassname">itools.</code><code class="descname">rand_prime</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>k</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/itools.html#rand_prime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#itools.rand_prime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a random prime number between two integers.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>a (int): an integer
+b (int): an integer such as b &gt; a
+k (int): the number of repetitions Rabin-Miller primality test.</dd>
+<dt>Optional Args:</dt>
+<dd>verbose (bool): set to True if you want a display.</dd>
+<dt>Returns:</dt>
+<dd>(int) a random pseudo-prime between a and b.</dd>
+</dl>
+<p>Why &#8220;pseudo-prime&#8221;? Because you can never be sure that they are prime with RM primality test.</p>
+</dd></dl>
+
 <div class="section" id="navigation">
 <h2>Navigation<a class="headerlink" href="#navigation" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">

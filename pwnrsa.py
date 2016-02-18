@@ -37,54 +37,84 @@ __status__ = "Beta"
 import itools, math
 from multiprocessing import Pool
 
-# Generation des listes de convergents de a et b
-# pré-requis : a,b rationnels (pour que les listes soient finies)
+#TODO: check that this fonctions works as intended in uncommon cases
+#TODO: write a better version of this function
 def gen_convergents(a, b, verbose=False, denom_only=True):
-    conv = []
-    if a >= b:
-        r0 = a
-        r1 = b
-    else:
-        r0 = b
-        r1 = a
-    u0 = 1
-    v0 = 0
-    u1 = 0
-    v1 = 1
-    if verbose:
-        print("q\tr\tu\tv")
-        print("0\t{0}\t{1}\t{2}".format(r0, u0, v0))
-    fini = False
-    while not fini:
-        q = r0 // r1
-        temp = r0 % r1
-        r0 = r1
-        r1 = temp
-        temp = u0 - q * u1
-        u0 = u1
-        u1 = temp
-        temp = v0 - q * v1
-        v0 = v1
-        v1 = temp
-        if denom_only:
-            conv.append(abs(v0))
-        else:
-            conv.append([abs(u0),abs(v0)])
-        if verbose:
-            print("{0}\t{1}\t{2}\t{3}".format(q, r0, u0, v0))
-        if r1 == 0:
-            fini = True
-            if verbose:
-                print("Algo termine")
-                print("pgcd({0},{1}) = {2} = {3}x{4} + {5}x{6}".format(a, b, r0, u0, a, v0, b))
-    return conv
+	"""Generates the continued fraction representation of a/b.
+	Very similar to Euclide's extended algorithm.
+	
+	Args:
+		- *a (int)*: some integer
+		- *b (int)*: another integer
+	
+	Optional args:
+		- *verbose (bool)*: set to True to get a display.
+		- *denom_only (bool)*: set to True if you only need the list of denominators.
+		
+	Returns:
+		- *(List)*: a list of tuples (integers if denom_only is set to True) representing the continued fraction.
+	"""
+		
+	conv = []
+	if a >= b:
+		r0 = a
+		r1 = b
+	else:
+		r0 = b
+		r1 = a
+	u0 = 1
+	v0 = 0
+	u1 = 0
+	v1 = 1
+	if verbose:
+		print("q\tr\tu\tv")
+		print("0\t{0}\t{1}\t{2}".format(r0, u0, v0))
+	fini = False
+	while not fini:
+		q = r0 // r1
+		temp = r0 % r1
+		r0 = r1
+		r1 = temp
+		temp = u0 - q * u1
+		u0 = u1
+		u1 = temp
+		temp = v0 - q * v1
+		v0 = v1
+		v1 = temp
+		if denom_only:
+			conv.append(abs(v0))
+		else:
+			conv.append([abs(u0),abs(v0)])
+		if verbose:
+			print("{0}\t{1}\t{2}\t{3}".format(q, r0, u0, v0))
+		if r1 == 0:
+			fini = True
+			if verbose:
+				print("Algo termine")
+				print("pgcd({0},{1}) = {2} = {3}x{4} + {5}x{6}".format(a, b, r0, u0, a, v0, b))
+	return conv
 
 #Conv = gen_convergents(60728973,160523347,False,False)
 #print(Conv)
 
-#Retourne p et q tels que n = pq étant donné n et l'indicatrice d'Euler.
-#p et q sont réels ici, ils ne sont entiers que si phi est bien l'indicatrice d'Euler de n.
+
 def get_pq(n,phi,verbose=False):
+	"""Returns the facorisation of an RSA integer when you know its Euler totient.
+	
+	Args:
+		- *n (int)*: a RSA integer (n = p*q with p and q two prime numbers).
+		- *phi (int)*: Euler's totient for n (or a guess).
+		
+	Optional Args:
+		- *verbose (bool)*: set to True to get a display.
+		
+	Returns:
+		- *(double,double)*: two real numbers which are the solution of a simple second degree polynomial equation.
+							If those number are integers, then phi was indeed Euler's totient for n.
+		
+	This function is useful to test if a given phi is a plausible one.
+	"""
+	
 	a = n - phi +1
 	delta = a*a - 4*n
 	if(delta<0) :
@@ -101,21 +131,62 @@ def get_pq(n,phi,verbose=False):
 # d est alors le dénominateur d'une fraction réduite de e/n
 # ici phi(n) est assimilé à n
 def wiener1(n,e,m,c,verbose=False):
-    conv = gen_convergents(n,e)
-    for d in conv:
-    	if(verbose): print("d prob =",d)
-    	p = itools.exp_mod(c,d,n)
-    	if(verbose): print("pow =",p)
-    	if  p == m%n:
-            if(verbose): print("\nwiener : success!!!\nSecret exponent :", d, "\n")
-            return d
-    if(verbose): print("\nwiener failed :(\n")
-    return 0
-    
+	"""Trivial implementation of Wiener's attack on RSA that uses a plain and a cipher to test potential private exponents.
+	
+	Args:
+		- *n (int)*: the modulo
+		- *e (int)*: public exponent
+		- *m (int)*: plain
+		- *c (int)*: cypher (m^e % n)
+		
+	Optional Args:
+		- *verbose (bool)*: set to True to get a display.
+		
+	Returns:
+		- *(int)*: the private exponent if the attack succeeded
+				   0 if attack failed
+	
+	For this attack to work, the private exponent d must be such that :
+		d < (1/3)n^(1/4)
+		
+	d is then the denominator of a reduced fraction of e/n :
+		In this attack we assume Phi(n) ~ n.
+	"""
+		
+	conv = gen_convergents(n,e)
+	for d in conv:
+		if(verbose): print("d prob =",d)
+		p = itools.exp_mod(c,d,n)
+		if(verbose): print("pow =",p)
+		if  p == m%n:
+			if(verbose): print("\nwiener : success!!!\nSecret exponent :", d, "\n")
+			return d
+	if(verbose): print("\nwiener failed :(\n")
+	return 0
+	
 #wiener1(160523347, 60728973, 313, 75454098, True)
-    
+	
 #Wiener sans utiliser de message, on vérifie d en calculant l'indicatrice d'Euler
 def wiener2(n,e,verbose=False):
+	"""Trivial implementation of Wiener's attack on RSA which computes Phi(n) to test potential private exponents.
+	
+	Args:
+		- *n (int)*: the modulo
+		- *e (int)*: public exponent
+		
+	Optional Args:
+		- *verbose (bool)*: set to True to get a display.
+		
+	Returns:
+		- *(int)*: the private exponent if the attack succeeded
+				0 if attack failed
+	
+	For this attack to work, the private exponent d must be such that :
+		d < (1/3)n^(1/4)
+		
+	d is then the denominator of a reduced fraction of e/n :
+		In this attack we assume Phi(n) ~ n.
+	"""
 	conv = gen_convergents(n,e,False,False)
 	for f in conv:
 		k = f[0]
@@ -131,17 +202,34 @@ def wiener2(n,e,verbose=False):
 					if(verbose): print("\nwiener : success!!!\nSecret exponent :", d, "\n")
 					return d
 	if(verbose): print("\nwiener failed :(\n")
-    
+	
 #wiener2(160523347, 60728973, True)
 
 
-# n : modulo, e : exposant chiffrement, m : message, c : chiffré (m^e % n) (m et c ne servent qu'à vérifier d)
-# d (exposant de déchiffrement) doit vérifier :
-# d < (n^(3/4))/|p-q|
-# p et q doivent être proches
-# d est alors le dénominateur d'une fration réduite de e / (n+1-2*sqrt(n))
-# ici phi(n) est assimilé à (n+1-2*sqrt(n)) (car p et q proches de sqrt(n))
 def weger1(n,e,m,c,verbose=False):
+	"""Trivial implementation of Weger's attack on RSA that uses a plain and a cipher to test potential private exponents.
+	
+	Args:
+		- *n (int)*: the modulo
+		- *e (int)*: public exponent
+		- *m (int)*: plain
+		- *c (int)*: cypher (m^e % n)
+		
+	Optional Args:
+		- *verbose (bool)*: set to True to get a display.
+		
+	Returns:
+		- *(int)*: the private exponent if the attack succeeded
+				   0 if attack failed
+	
+	For this attack to work, the private exponent d must be such that :
+		d < (n^(3/4))/abs(p-q)
+		p and q must close to each other.
+		
+	d is then the denominator of a reduced fraction of e/(n+1-2*sqrt(n)) :
+		In this attack we assume Phi(n) ~ (n+1-2*sqrt(n)) (since we assume p ~ q ~ sqrt(n))
+	"""
+	
 	conv = gen_convergents(n+1-2*itools.isqrt(n), e)
 	for d in conv:
 		if(verbose): print("d prob =",d)
@@ -153,8 +241,28 @@ def weger1(n,e,m,c,verbose=False):
 	if(verbose): print("\nweger failed :(\n")
 	return 0
 	
-#Weger sans utiliser de message, on vérifie d en calculant l'indicatrice d'Euler
+	
 def weger2(n,e,verbose=False):
+	"""Trivial implementation of Weger's attack on RSA which computes Phi(n) to test potential private exponents.
+	
+	Args:
+		- *n (int)*: the modulo
+		- *e (int)*: public exponent
+		
+	Optional Args:
+		- *verbose (bool)*: set to True to get a display.
+		
+	Returns:
+		- *(int)*: the private exponent if the attack succeeded
+				0 if attack failed
+	
+	For this attack to work, the private exponent d must be such that :
+		d < (n^(3/4))/abs(p-q)
+		p and q must close to each other.
+		
+	d is then the denominator of a reduced fraction of e/(n+1-2*sqrt(n)) :
+		In this attack we assume Phi(n) ~ (n+1-2*sqrt(n)) (since we assume p ~ q ~ sqrt(n))
+	"""
 	conv = gen_convergents(n+1-2*itools.isqrt(n), e, False, False)
 	for f in conv:
 		k = f[0]
@@ -170,8 +278,8 @@ def weger2(n,e,verbose=False):
 					if(verbose): print("\nweger : success!!!\nSecret exponent :", d, "\n")
 					return d
 	if(verbose): print("\nweger failed :(\n")
-    
-#instance résolue par Weger sur laquelle Wiener échoue
+	
+#instance on which Wiener fails but Weger succeeds.
 """
 p = 10037
 q = 10039
@@ -186,15 +294,7 @@ weger2(n,e,True)
 wiener2(n,e,True)
 """
 
-#Weger étendue, parallélisée
-# n : modulo, e : exposant chiffrement
-# n = pq avec p et q vérifiant :
-# q < p < 2q
-# p/q ~ 1 + a/b
-# a,b dans [0,B]
-# B borne définie par l'utilisateur, la complexité étant proportionelle à B²
-
-#sous-routine de Weger dédiée à la parallélisation
+#sub-fonction for weger_ex
 def sub_weger(args):
 	n = args[0]
 	e = args[1]
@@ -217,8 +317,39 @@ def sub_weger(args):
 						if(int(p)*int(q) == n):
 							return d
 	return 0
-
+	
+#Weger étendue, parallélisée
+# n : modulo, e : exposant chiffrement
+# n = pq avec p et q vérifiant :
+# q < p < 2q
+# p/q ~ 1 + a/b
+# a,b dans [0,B]
+# B borne définie par l'utilisateur, la complexité étant proportionelle à B²
 def weger_ex(n,e,B,jobs=8,verbose=False):
+	"""Parallelized version of the extended Weger attack on RSA.
+	
+	Args:
+		- *n (int)*: the modulo
+		- *e (int)*: public exponent
+		- *B (int)*: user bound, time complexity is ~ O(B²)
+		
+	Optional Args:
+		- *jobs (int)*: number of threads to launch. Should be your number of virtual cores (htop to visualize).
+		- *verbose (bool)*: set to True to get a display.
+		
+	Returns:
+		- *(int)*: the private exponent if the attack succeeded
+				   0 if attack failed
+	
+	For this attack to work, n = pq must be such that :
+		q < p < 2p
+		p/q ~ 1 + a/b with a,b in [0,B]
+		
+	d is then the denominator of a reduced fraction of e/F, where F is such that :
+		F = n+1 - ((2+a/b)/sqrt(1+a/b))*sqrt(n)
+		In this attack we assume Phi(n) ~ n+1 - ((2+a/b)/sqrt(1+a/b))*sqrt(n)
+	"""
+	
 	map_args = []
 	for j in range(jobs):
 		amin = int((j/jobs)*B+1)

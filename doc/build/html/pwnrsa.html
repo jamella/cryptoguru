@@ -41,6 +41,237 @@
             
   <div class="section" id="module-pwnrsa">
 <span id="pwnrsa-efficient-attacks-on-rsa"></span><h1>pwnrsa : efficient attacks on RSA<a class="headerlink" href="#module-pwnrsa" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pwnrsa.gen_convergents">
+<code class="descclassname">pwnrsa.</code><code class="descname">gen_convergents</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>verbose=False</em>, <em>denom_only=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pwnrsa.html#gen_convergents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pwnrsa.gen_convergents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates the continued fraction representation of a/b.
+Very similar to Euclide&#8217;s extended algorithm.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>a (int)</em>: some integer</li>
+<li><em>b (int)</em>: another integer</li>
+</ul>
+</dd>
+<dt>Optional args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True to get a display.</li>
+<li><em>denom_only (bool)</em>: set to True if you only need the list of denominators.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last simple">
+<li><em>(List)</em>: a list of tuples (integers if denom_only is set to True) representing the continued fraction.</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pwnrsa.get_pq">
+<code class="descclassname">pwnrsa.</code><code class="descname">get_pq</code><span class="sig-paren">(</span><em>n</em>, <em>phi</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pwnrsa.html#get_pq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pwnrsa.get_pq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the facorisation of an RSA integer when you know its Euler totient.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: a RSA integer (n = p*q with p and q two prime numbers).</li>
+<li><em>phi (int)</em>: Euler&#8217;s totient for n (or a guess).</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True to get a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>(double,double)</em>: two real numbers which are the solution of a simple second degree polynomial equation.</dt>
+<dd><p class="first last">If those number are integers, then phi was indeed Euler&#8217;s totient for n.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<p>This function is useful to test if a given phi is a plausible one.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pwnrsa.weger1">
+<code class="descclassname">pwnrsa.</code><code class="descname">weger1</code><span class="sig-paren">(</span><em>n</em>, <em>e</em>, <em>m</em>, <em>c</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pwnrsa.html#weger1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pwnrsa.weger1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trivial implementation of Weger&#8217;s attack on RSA that uses a plain and a cipher to test potential private exponents.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: the modulo</li>
+<li><em>e (int)</em>: public exponent</li>
+<li><em>m (int)</em>: plain</li>
+<li><em>c (int)</em>: cypher (m^e % n)</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True to get a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>(int)</em>: the private exponent if the attack succeeded</dt>
+<dd><p class="first last">0 if attack failed</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>For this attack to work, the private exponent d must be such that :</dt>
+<dd>d &lt; (n^(3/4))/abs(p-q)
+p and q must close to each other.</dd>
+<dt>d is then the denominator of a reduced fraction of e/(n+1-2*sqrt(n)) :</dt>
+<dd>In this attack we assume Phi(n)&nbsp;~ (n+1-2*sqrt(n)) (since we assume p ~ q ~ sqrt(n))</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pwnrsa.weger2">
+<code class="descclassname">pwnrsa.</code><code class="descname">weger2</code><span class="sig-paren">(</span><em>n</em>, <em>e</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pwnrsa.html#weger2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pwnrsa.weger2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trivial implementation of Weger&#8217;s attack on RSA which computes Phi(n) to test potential private exponents.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: the modulo</li>
+<li><em>e (int)</em>: public exponent</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True to get a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>(int)</em>: the private exponent if the attack succeeded</dt>
+<dd><p class="first last">0 if attack failed</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>For this attack to work, the private exponent d must be such that :</dt>
+<dd>d &lt; (n^(3/4))/abs(p-q)
+p and q must close to each other.</dd>
+<dt>d is then the denominator of a reduced fraction of e/(n+1-2*sqrt(n)) :</dt>
+<dd>In this attack we assume Phi(n)&nbsp;~ (n+1-2*sqrt(n)) (since we assume p ~ q ~ sqrt(n))</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pwnrsa.weger_ex">
+<code class="descclassname">pwnrsa.</code><code class="descname">weger_ex</code><span class="sig-paren">(</span><em>n</em>, <em>e</em>, <em>B</em>, <em>jobs=8</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pwnrsa.html#weger_ex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pwnrsa.weger_ex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parallelized version of the extended Weger attack on RSA.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: the modulo</li>
+<li><em>e (int)</em>: public exponent</li>
+<li><em>B (int)</em>: user bound, time complexity is&nbsp;~ O(B²)</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>jobs (int)</em>: number of threads to launch. Should be your number of virtual cores (htop to visualize).</li>
+<li><em>verbose (bool)</em>: set to True to get a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>(int)</em>: the private exponent if the attack succeeded</dt>
+<dd><p class="first last">0 if attack failed</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>For this attack to work, n = pq must be such that :</dt>
+<dd>q &lt; p &lt; 2p
+p/q ~ 1 + a/b with a,b in [0,B]</dd>
+<dt>d is then the denominator of a reduced fraction of e/F, where F is such that :</dt>
+<dd>F = n+1 - ((2+a/b)/sqrt(1+a/b))*sqrt(n)
+In this attack we assume Phi(n)&nbsp;~ n+1 - ((2+a/b)/sqrt(1+a/b))*sqrt(n)</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pwnrsa.wiener1">
+<code class="descclassname">pwnrsa.</code><code class="descname">wiener1</code><span class="sig-paren">(</span><em>n</em>, <em>e</em>, <em>m</em>, <em>c</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pwnrsa.html#wiener1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pwnrsa.wiener1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trivial implementation of Wiener&#8217;s attack on RSA that uses a plain and a cipher to test potential private exponents.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: the modulo</li>
+<li><em>e (int)</em>: public exponent</li>
+<li><em>m (int)</em>: plain</li>
+<li><em>c (int)</em>: cypher (m^e % n)</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True to get a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>(int)</em>: the private exponent if the attack succeeded</dt>
+<dd><p class="first last">0 if attack failed</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>For this attack to work, the private exponent d must be such that :</dt>
+<dd>d &lt; (1/3)n^(1/4)</dd>
+<dt>d is then the denominator of a reduced fraction of e/n :</dt>
+<dd>In this attack we assume Phi(n)&nbsp;~ n.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pwnrsa.wiener2">
+<code class="descclassname">pwnrsa.</code><code class="descname">wiener2</code><span class="sig-paren">(</span><em>n</em>, <em>e</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pwnrsa.html#wiener2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pwnrsa.wiener2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trivial implementation of Wiener&#8217;s attack on RSA which computes Phi(n) to test potential private exponents.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><em>n (int)</em>: the modulo</li>
+<li><em>e (int)</em>: public exponent</li>
+</ul>
+</dd>
+<dt>Optional Args:</dt>
+<dd><ul class="first last simple">
+<li><em>verbose (bool)</em>: set to True to get a display.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>(int)</em>: the private exponent if the attack succeeded</dt>
+<dd><p class="first last">0 if attack failed</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>For this attack to work, the private exponent d must be such that :</dt>
+<dd>d &lt; (1/3)n^(1/4)</dd>
+<dt>d is then the denominator of a reduced fraction of e/n :</dt>
+<dd>In this attack we assume Phi(n)&nbsp;~ n.</dd>
+</dl>
+</dd></dl>
+
 <div class="section" id="navigation">
 <h2>Navigation<a class="headerlink" href="#navigation" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
